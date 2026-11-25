@@ -1,0 +1,26 @@
+============================================================
+              RENTAL STUDIO - OFFICIAL INVOICE              
+         iPhone & Professional Photography Equipment        
+============================================================
+No. Invoice      : INV-TRX-001
+ID Transaksi     : TRX-001
+Nama Penyewa     : Nadia Zen (@penyewa)
+Status Transaksi : SELESAI
+Tanggal Sewa     : 2026-11-23
+Jatuh Tempo      : 2026-11-24
+Tanggal Kembali  : 2026-11-26
+Lama Sewa        : 1 Hari
+Metode Bayar     : Transfer Bank
+Info Pembayaran  : Lunas via Transfer Bank (8801-9920-4412 (BCA Virtual Account)) | Total Dibayar: Rp252.500,00 (termasuk admin Rp 2.500)
+------------------------------------------------------------
+RINCIAN PERANGKAT DISEWA:
+ 1. [IPH-02] iPhone 15 Pro 128GB (IPhone)
+    Tarif: Rp220.000,00/hari | + Asuransi Perangkat Rp30.000,00
+    Subtotal (1 hari): Rp250.000,00
+------------------------------------------------------------
+Subtotal Sewa    : Rp250.000,00
+Keterlambatan    : 2 hari (Rp 50.000/hari)
+Denda            : Rp100.000,00
+============================================================
+TOTAL TAGIHAN    : Rp350.000,00
+============================================================
