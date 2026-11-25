@@ -67,3 +67,74 @@ public class DaftarBarang {
         target.setTarifHarian(tarifBaru);
         target.setSpesifikasi(spekBaru != null ? spekBaru.trim() : "");
         target.setTersedia(tersedia);
+    }
+
+    /**
+     * Method kompatibilitas sesuai spesifikasi dasar Class Diagram untuk menandai proses edit barang.
+     *
+     * @param id kode ID barang
+     */
+    public void editBarang(String id) {
+        Barang target = cariBarangById(id);
+        if (target != null) {
+            target.setNama(target.getNama());
+        }
+    }
+
+    /**
+     * Menghapus barang dari katalog berdasarkan ID barang.
+     *
+     * @param id kode ID barang yang akan dihapus
+     * @throws InputTidakValidException jika barang tidak ditemukan atau sedang disewa
+     */
+    public void hapusBarang(String id) throws InputTidakValidException {
+        Barang target = cariBarangById(id);
+        if (target == null) {
+            throw new InputTidakValidException("Barang dengan ID '" + id + "' tidak ditemukan.");
+        }
+        if (!target.isTersedia()) {
+            throw new InputTidakValidException("Barang sedang disewa dan tidak dapat dihapus sebelum dikembalikan.");
+        }
+        barang.remove(target);
+    }
+
+    /**
+     * Mencari barang berdasarkan ID secara case-insensitive.
+     *
+     * @param id kode ID barang
+     * @return objek {@link Barang} jika ditemukan, atau null jika tidak ada
+     */
+    public Barang cariBarangById(String id) {
+        if (id == null) return null;
+        for (Barang b : barang) {
+            if (b.getId().equalsIgnoreCase(id.trim())) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Mengembalikan seluruh daftar barang yang tersimpan.
+     *
+     * @return ArrayList berisi seluruh objek {@link Barang}
+     */
+    public ArrayList<Barang> getBarang() {
+        return barang;
+    }
+
+    /**
+     * Mengembalikan daftar barang yang sedang tersedia untuk disewa.
+     *
+     * @return List barang dengan status tersedia == true
+     */
+    public List<Barang> getBarangTersedia() {
+        List<Barang> hasil = new ArrayList<>();
+        for (Barang b : barang) {
+            if (b.isTersedia()) {
+                hasil.add(b);
+            }
+        }
+        return hasil;
+    }
+}
