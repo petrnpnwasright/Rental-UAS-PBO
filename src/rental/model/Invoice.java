@@ -120,3 +120,48 @@ public class Invoice {
         sb.append(String.format("TOTAL TAGIHAN    : %s\n", nf.format(total)));
         sb.append("============================================================\n");
         return sb.toString();
+    }
+
+    /**
+     * Mencetak invoice ke dalam file teks pada folder {@code data/invoices/} sesuai spesifikasi Class Diagram.
+     */
+    public void cetakInvoice() {
+        try {
+            File dir = new File("data/invoices");
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File outFile = new File(dir, idInvoice + ".txt");
+            try (PrintWriter pw = new PrintWriter(
+                    new OutputStreamWriter(new FileOutputStream(outFile), StandardCharsets.UTF_8))) {
+                pw.print(generateTeksInvoice());
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal menyimpan file invoice: " + e.getMessage());
+        }
+    }
+
+    public String getIdInvoice() {
+        return idInvoice;
+    }
+
+    public Transaksi getTransaksi() {
+        return transaksi;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public double getDenda() {
+        return denda;
+    }
+
+    public void setDenda(double denda) {
+        this.denda = denda;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+}
