@@ -69,3 +69,52 @@ public class Admin extends Akun {
         Invoice invoice = new Invoice("INV-" + t.getId(), t);
         invoice.hitungTotal();
         t.setInvoice(invoice);
+    }
+
+    /**
+     * Mengonfirmasi pengembalian barang menggunakan tanggal hari ini sebagai tanggal kembali.
+     *
+     * @param t transaksi aktif yang barangnya dikembalikan
+     * @throws InputTidakValidException jika transaksi tidak berstatus DISEWA
+     */
+    public void konfirmasiKembali(Transaksi t) throws InputTidakValidException {
+        konfirmasiKembali(t, LocalDate.now());
+    }
+
+    /**
+     * Mengonfirmasi pengembalian barang dengan tanggal pengembalian tertentu
+     * (mendukung simulasi keterlambatan saat demo presentasi).
+     *
+     * @param t              transaksi aktif yang dikembalikan
+     * @param tanggalKembali tanggal aktual pengembalian barang
+     * @throws InputTidakValidException jika transaksi tidak berstatus DISEWA
+     */
+    public void konfirmasiKembali(Transaksi t, LocalDate tanggalKembali) throws InputTidakValidException {
+        if (t == null) {
+            throw new InputTidakValidException("Transaksi tidak ditemukan.");
+        }
+        if (!"DISEWA".equals(t.getStatus())) {
+            throw new InputTidakValidException(
+                    "Hanya transaksi berstatus DISEWA yang dapat dikonfirmasi pengembaliannya.");
+        }
+        t.setTanggalKembali(tanggalKembali);
+        t.ubahStatus("SELESAI");
+
+        for (Barang b : t.getBarang()) {
+            b.setTersedia(true);
+        }
+
+        Invoice inv = t.getInvoice();
+        if (inv == null) {
+            inv = new Invoice("INV-" + t.getId(), t);
+            t.setInvoice(inv);
+        }
+        inv.hitungDenda();
+        inv.hitungTotal();
+    }
+
+    @Override
+    public String getRole() {
+        return "ADMIN";
+    }
+}
