@@ -59,3 +59,70 @@ public class Transaksi {
         }
         return total;
     }
+
+    /**
+     * Mengubah status transaksi (MENUNGGU_KONFIRMASI, DISEWA, SELESAI).
+     *
+     * @param status status baru transaksi
+     */
+    public void ubahStatus(String status) {
+        this.status = status;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Penyewa getPenyewa() {
+        return penyewa;
+    }
+
+    public ArrayList<Barang> getBarang() {
+        return barang;
+    }
+
+    public int getLamaSewa() {
+        return lamaSewa;
+    }
+
+    public LocalDate getTanggalSewa() {
+        return tanggalSewa;
+    }
+
+    public void setTanggalSewa(LocalDate tanggalSewa) {
+        this.tanggalSewa = tanggalSewa;
+        this.tanggalJatuhTempo = tanggalSewa.plusDays(lamaSewa);
+    }
+
+    public LocalDate getTanggalJatuhTempo() {
+        return tanggalJatuhTempo;
+    }
+
+    public void setTanggalJatuhTempo(LocalDate tanggalJatuhTempo) {
+        this.tanggalJatuhTempo = tanggalJatuhTempo;
+    }
+
+    public LocalDate getTanggalKembali() {
+        return tanggalKembali;
+    }
+
+    public void setTanggalKembali(LocalDate tanggalKembali) {
+        this.tanggalKembali = tanggalKembali;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Pembayaran getPembayaran() {
+        return pembayaran;
+    }
+
+    public Invoice getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+    }
+}
