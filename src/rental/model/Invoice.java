@@ -69,3 +69,54 @@ public class Invoice {
         hitungDenda();
         this.total = transaksi.hitungTotalSewa() + this.denda;
         return this.total;
+    }
+
+    /**
+     * Menghasilkan string rincian lengkap Invoice untuk ditampilkan pada UI maupun disimpan ke file.
+     *
+     * @return teks terformat bukti invoice
+     */
+    public String generateTeksInvoice() {
+        hitungTotal();
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("============================================================\n");
+        sb.append("              RENTAL STUDIO - OFFICIAL INVOICE              \n");
+        sb.append("         iPhone & Professional Photography Equipment        \n");
+        sb.append("============================================================\n");
+        sb.append("No. Invoice      : ").append(idInvoice).append("\n");
+        sb.append("ID Transaksi     : ").append(transaksi.getId()).append("\n");
+        sb.append("Nama Penyewa     : ").append(transaksi.getPenyewa().getNamaLengkap())
+          .append(" (@").append(transaksi.getPenyewa().getUsername()).append(")\n");
+        sb.append("Status Transaksi : ").append(transaksi.getStatus()).append("\n");
+        sb.append("Tanggal Sewa     : ").append(transaksi.getTanggalSewa()).append("\n");
+        sb.append("Jatuh Tempo      : ").append(transaksi.getTanggalJatuhTempo()).append("\n");
+        sb.append("Tanggal Kembali  : ")
+          .append(transaksi.getTanggalKembali() != null ? transaksi.getTanggalKembali() : "Belum Dikembalikan")
+          .append("\n");
+        sb.append("Lama Sewa        : ").append(transaksi.getLamaSewa()).append(" Hari\n");
+        sb.append("Metode Bayar     : ").append(transaksi.getPembayaran().getNamaMetode()).append("\n");
+        sb.append("Info Pembayaran  : ").append(transaksi.getPembayaran().getDetailPembayaran()).append("\n");
+        sb.append("------------------------------------------------------------\n");
+        sb.append("RINCIAN PERANGKAT DISEWA:\n");
+        int no = 1;
+        for (Barang b : transaksi.getBarang()) {
+            sb.append(String.format(" %d. [%s] %s (%s)\n", no++, b.getId(), b.getNama(), b.getKategori()));
+            sb.append(String.format("    Tarif: %s/hari | %s\n",
+                    nf.format(b.getTarifHarian()), b.getKeteranganTarif()));
+            sb.append(String.format("    Subtotal (%d hari): %s\n",
+                    transaksi.getLamaSewa(), nf.format(b.hitungBiaya(transaksi.getLamaSewa()))));
+        }
+        sb.append("------------------------------------------------------------\n");
+        long hariTelat = 0;
+        if (transaksi.getTanggalKembali() != null) {
+            hariTelat = Math.max(0, ChronoUnit.DAYS.between(
+                    transaksi.getTanggalJatuhTempo(), transaksi.getTanggalKembali()));
+        }
+        sb.append(String.format("Subtotal Sewa    : %s\n", nf.format(transaksi.hitungTotalSewa())));
+        sb.append(String.format("Keterlambatan    : %d hari (Rp 50.000/hari)\n", hariTelat));
+        sb.append(String.format("Denda            : %s\n", nf.format(denda)));
+        sb.append("============================================================\n");
+        sb.append(String.format("TOTAL TAGIHAN    : %s\n", nf.format(total)));
+        sb.append("============================================================\n");
+        return sb.toString();
