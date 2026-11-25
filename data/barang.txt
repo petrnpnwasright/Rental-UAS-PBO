@@ -1,0 +1,10 @@
+# Format: KATEGORI|ID|NAMA|TARIF_HARIAN|TERSEDIA|SPESIFIKASI|PARAM_KHUSUS|GAMBAR_PATH
+IPhone|IPH-02|iPhone 15 Pro 128GB|220000.0|true|Natural Titanium, Apple Log, USB-C 10Gbps|30000.0|assets/products/IPH-02.png
+IPhone|IPH-03|iPhone 14 Pro Max 256GB|185000.0|true|Deep Purple, 48MP Main ProRAW, Dynamic Island|25000.0|assets/products/IPH-03.png
+Kamera|KMR-01|Sony Alpha A7 IV Body Only|350000.0|true|33MP Full-Frame Exmor R, 4K 60p 10-bit 4:2:2|40000.0|assets/products/KMR-01.png
+Kamera|KMR-02|Canon EOS R6 Mark II|330000.0|true|24.2MP Full-Frame CMOS, Dual Pixel AF II, 40fps|40000.0|assets/products/KMR-02.png
+Kamera|KMR-03|Fujifilm X100VI Silver|260000.0|true|40.2MP X-Trans 5 HR, IBIS 6-Stop, Film Simulation|30000.0|assets/products/KMR-03.png
+Aksesoris Fotografi|AKS-01|DJI Ronin RS 3 Pro Gimbal|140000.0|true|Carbon Fiber Arms, Payload 4.5kg, LiDAR Support|Stabilizer Gimbal|assets/products/AKS-01.png
+Aksesoris Fotografi|AKS-02|Sony FE 24-70mm f/2.8 GM II|175000.0|true|G-Master Constant f/2.8, E-Mount Full Frame|Lensa Zoom|assets/products/AKS-02.png
+Aksesoris Fotografi|AKS-03|Godox SL-60W LED Studio Kit|95000.0|true|60W 5600K Daylight + Softbox Octagon 80cm + Stand|Studio Lighting|assets/products/AKS-03.png
+Aksesoris Fotografi|AKS-04|goks|1000.0|true|dia goks|gokil|assets/products/AKS-04.png
