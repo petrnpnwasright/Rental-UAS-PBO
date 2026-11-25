@@ -68,3 +68,64 @@ public class RentalDataStore {
         if (!invDir.exists()) {
             invDir.mkdirs();
         }
+    }
+
+    /**
+     * Memuat daftar akun pengguna dari {@code data/akun.txt}.
+     */
+    public void loadAkun() {
+        daftarAkun.clear();
+        File file = new File(FILE_AKUN);
+        if (!file.exists()) {
+            seedAkunDefault();
+            saveAkun();
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("#")) continue;
+                String[] p = line.split("\\|");
+                if (p.length >= 5) {
+                    String role = p[0].trim();
+                    String id = p[1].trim();
+                    String user = p[2].trim();
+                    String pass = p[3].trim();
+                    String nama = p[4].trim();
+                    if ("ADMIN".equalsIgnoreCase(role)) {
+                        daftarAkun.add(new Admin(id, user, pass, nama));
+                    } else {
+                        daftarAkun.add(new Penyewa(id, user, pass, nama));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal membaca akun.txt: " + e.getMessage());
+        }
+        if (daftarAkun.isEmpty()) {
+            seedAkunDefault();
+            saveAkun();
+        }
+    }
+
+    private void seedAkunDefault() {
+        daftarAkun.add(new Admin("ADM-01", "admin", "admin123", "Ethan Reynolds"));
+        daftarAkun.add(new Penyewa("PNY-01", "penyewa", "penyewa123", "Raka Pratama"));
+        daftarAkun.add(new Penyewa("PNY-02", "nadia", "nadia123", "Nadia Putri"));
+    }
+
+    /**
+     * Menyimpan seluruh daftar akun ke dalam {@code data/akun.txt}.
+     */
+    public void saveAkun() {
+        try (PrintWriter pw = new PrintWriter(
+                new OutputStreamWriter(new FileOutputStream(FILE_AKUN), StandardCharsets.UTF_8))) {
+            pw.println("# Format: ROLE|ID|USERNAME|PASSWORD|NAMA_LENGKAP");
+            for (Akun a : daftarAkun) {
+                pw.println(a.getRole() + "|" + a.getId() + "|" + a.getUsername() + "|"
+                        + a.getPassword() + "|" + a.getNamaLengkap());
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal menyimpan akun.txt: " + e.getMessage());
+        }
