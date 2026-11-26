@@ -152,3 +152,53 @@ public class PenyewaPanel extends JPanel {
         bar.add(searchWrap, BorderLayout.EAST);
         return bar;
     }
+
+    private JPanel buildKatalogView() {
+        JPanel main = new JPanel(new BorderLayout(0, 14));
+        main.setOpaque(false);
+
+        JPanel northContainer = new JPanel(new BorderLayout(0, 14));
+        northContainer.setOpaque(false);
+        northContainer.add(buildGreetingBar(), BorderLayout.NORTH);
+
+        JPanel topRow = new JPanel(new GridLayout(1, 2, 16, 0));
+        topRow.setOpaque(false);
+        topRow.setPreferredSize(new Dimension(500, 175));
+
+        // Kartu Kiri: Smart Catalog Summary + Filter Kategori (seperti Smart Wallet di gambar)
+        RoundedPanel smartCard = new RoundedPanel(new BorderLayout(0, 10), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        smartCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+
+        JPanel smartTop = new JPanel(new BorderLayout());
+        smartTop.setOpaque(false);
+        JPanel stLeft = new JPanel();
+        stLeft.setOpaque(false);
+        stLeft.setLayout(new BoxLayout(stLeft, BoxLayout.Y_AXIS));
+        JLabel lblSmartTitle = new JLabel("Katalog Studio");
+        lblSmartTitle.setFont(Theme.FONT_H2);
+        lblSmartTitle.setForeground(Theme.TEXT_PRIMARY);
+        JLabel lblSmartSub = new JLabel("Diskon 10% Aksesoris sewa >= 3 hari");
+        lblSmartSub.setFont(Theme.FONT_SMALL);
+        lblSmartSub.setForeground(Theme.TEXT_SECONDARY);
+        stLeft.add(lblSmartTitle);
+        stLeft.add(lblSmartSub);
+
+        RoundedButton btnSemua = new RoundedButton(
+                "Semua Unit", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnSemua.setFont(Theme.FONT_SMALL_BOLD);
+        btnSemua.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        btnSemua.addActionListener(e -> {
+            selectedCategory = "SEMUA";
+            refreshAll();
+        });
+
+        smartTop.add(stLeft, BorderLayout.WEST);
+        smartTop.add(btnSemua, BorderLayout.EAST);
+
+        int tersediaCount = dataStore.getDaftarBarang().getBarangTersedia().size();
+        int totalCount = dataStore.getDaftarBarang().getBarang().size();
+
+        JLabel lblBigUnit = new JLabel(tersediaCount + " / " + totalCount + " Unit Siap Sewa");
+        lblBigUnit.setFont(new Font("SansSerif", Font.BOLD, 20));
+        lblBigUnit.setForeground(Theme.TEXT_PRIMARY);
+
