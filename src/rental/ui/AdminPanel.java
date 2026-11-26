@@ -256,3 +256,87 @@ public class AdminPanel extends JPanel {
 
         JPanel fieldsGrid = new JPanel(new GridLayout(2, 3, 12, 10));
         fieldsGrid.setOpaque(false);
+
+        JComboBox<String> cmbKategori = new JComboBox<>(new String[]{"IPhone", "Kamera", "Aksesoris Fotografi"});
+        cmbKategori.setBackground(Theme.BG_INPUT);
+        cmbKategori.setForeground(Theme.TEXT_PRIMARY);
+
+        RoundedTextField txtId = new RoundedTextField(10, 12);
+        txtId.setText(dataStore.generateNextBarangId("IPH"));
+
+        RoundedTextField txtNama = new RoundedTextField(16, 12);
+        RoundedTextField txtTarif = new RoundedTextField(12, 12);
+        RoundedTextField txtSpek = new RoundedTextField(18, 12);
+        RoundedTextField txtKhusus = new RoundedTextField(14, 12);
+        txtKhusus.setText("35000");
+
+        cmbKategori.addActionListener(e -> {
+            String sel = (String) cmbKategori.getSelectedItem();
+            if ("IPhone".equals(sel)) {
+                txtId.setText(dataStore.generateNextBarangId("IPH"));
+                txtKhusus.setText("35000");
+            } else if ("Kamera".equals(sel)) {
+                txtId.setText(dataStore.generateNextBarangId("KMR"));
+                txtKhusus.setText("40000");
+            } else {
+                txtId.setText(dataStore.generateNextBarangId("AKS"));
+                txtKhusus.setText("Stabilizer Gimbal");
+            }
+        });
+
+        fieldsGrid.add(wrapLabeledField("Kategori Barang", cmbKategori));
+        fieldsGrid.add(wrapLabeledField("ID Barang (Unik)", txtId));
+        fieldsGrid.add(wrapLabeledField("Nama Perangkat", txtNama));
+        fieldsGrid.add(wrapLabeledField("Tarif Harian (Rp)", txtTarif));
+        fieldsGrid.add(wrapLabeledField("Spesifikasi Singkat", txtSpek));
+        fieldsGrid.add(wrapLabeledField("Asuransi / Sensor / Jenis", txtKhusus));
+
+        String[] cols = {"ID", "Kategori", "Nama Barang", "Tarif/Hari", "Skema Tarif", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        for (Barang b : dataStore.getDaftarBarang().getBarang()) {
+            model.addRow(new Object[]{
+                    b.getId(),
+                    b.getKategori(),
+                    b.getNama(),
+                    Theme.formatRupiah(b.getTarifHarian()),
+                    b.getKeteranganTarif(),
+                    b.isTersedia() ? "TERSEDIA" : "SEDANG DISEWA"
+            });
+        }
+
+        JTable table = createStyledTable(model);
+        table.getSelectionModel().addListSelectionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                String id = (String) model.getValueAt(row, 0);
+                Barang b = dataStore.getDaftarBarang().cariBarangById(id);
+                if (b != null) {
+                    cmbKategori.setSelectedItem(b.getKategori());
+                    txtId.setText(b.getId());
+                    txtNama.setText(b.getNama());
+                    txtTarif.setText(String.valueOf((long) b.getTarifHarian()));
+                    txtSpek.setText(b.getSpesifikasi());
+                    txtKhusus.setText(b.getParameterKhususRaw());
+                }
+            }
+        });
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnRow.setOpaque(false);
+
+        RoundedButton btnTambah = new RoundedButton(
+                "+ Tambah Barang", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 14);
+        btnTambah.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnTambah.addActionListener(e -> {
+            try {
+                String kat = (String) cmbKategori.getSelectedItem();
+                String id = txtId.getText().trim();
+                String nama = txtNama.getText().trim();
+                if (nama.isEmpty()) throw new InputTidakValidException("Nama perangkat wajib diisi.");
+                double tarif = parsePositiveDouble(txtTarif.getText(), "Tarif harian");
+                String spek = txtSpek.getText().trim();
