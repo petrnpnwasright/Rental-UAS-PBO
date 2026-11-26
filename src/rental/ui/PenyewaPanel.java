@@ -429,3 +429,96 @@ public class PenyewaPanel extends JPanel {
 
         return card;
     }
+
+    /**
+     * Menampilkan jendela modal detail produk lengkap bergaya e-commerce
+     * beserta kalkulator estimasi biaya sewa dan tombol tambah ke keranjang.
+     */
+    private void tampilkanDetailProdukECommerce(Barang b) {
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this),
+                "Detail Produk — " + b.getNama(), JDialog.ModalityType.APPLICATION_MODAL);
+        dialog.setSize(760, 480);
+        dialog.setResizable(false);
+        dialog.setLocationRelativeTo(this);
+        dialog.getContentPane().setBackground(Theme.BG_ROOT);
+        dialog.setLayout(new BorderLayout());
+
+        RoundedPanel container = new RoundedPanel(new GridLayout(1, 2, 22, 0), 24, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        container.setBorder(BorderFactory.createEmptyBorder(22, 22, 22, 22));
+
+        JPanel outerPad = new JPanel(new BorderLayout());
+        outerPad.setBackground(Theme.BG_ROOT);
+        outerPad.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        outerPad.add(container, BorderLayout.CENTER);
+
+        // KOLOM KIRI: Preview Gambar Besar + Info Jaminan Studio
+        JPanel leftCol = new JPanel(new BorderLayout(0, 12));
+        leftCol.setOpaque(false);
+
+        JPanel largeImage = ImageHelper.createProductImagePanel(
+                b.getGambarPath(), b.getNama(), b.getKategori(), 20);
+        largeImage.setPreferredSize(new Dimension(310, 290));
+
+        RoundedPanel guaranteeBox = new RoundedPanel(new BorderLayout(), 14, Theme.BG_CARD_ALT, Theme.BORDER_SUBTLE);
+        guaranteeBox.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
+        JLabel lblGuarantee = new JLabel("<html><b>Unit Terkalibrasi &amp; Siap Pakai</b><br>"
+                + "Termasuk pengecekan fungsi, baterai penuh, dan tas pelindung.</html>");
+        lblGuarantee.setFont(Theme.FONT_SMALL);
+        lblGuarantee.setForeground(Theme.TEXT_SECONDARY);
+        guaranteeBox.add(lblGuarantee, BorderLayout.CENTER);
+
+        leftCol.add(largeImage, BorderLayout.CENTER);
+        leftCol.add(guaranteeBox, BorderLayout.SOUTH);
+
+        // KOLOM KANAN: Detail Lengkap E-Commerce & Aksi Sewa
+        JPanel rightCol = new JPanel(new BorderLayout(0, 12));
+        rightCol.setOpaque(false);
+
+        JPanel infoStack = new JPanel();
+        infoStack.setOpaque(false);
+        infoStack.setLayout(new BoxLayout(infoStack, BoxLayout.Y_AXIS));
+
+        // Baris Badge Kategori & Status
+        JPanel badgeRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        badgeRow.setOpaque(false);
+        badgeRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblKatBadge = new JLabel("  " + b.getKategori().toUpperCase() + " • " + b.getId() + "  ");
+        lblKatBadge.setFont(Theme.FONT_SMALL_BOLD);
+        lblKatBadge.setForeground(Theme.DARK_PILL);
+        lblKatBadge.setOpaque(true);
+        lblKatBadge.setBackground(Theme.ACCENT_LIME_SOFT);
+
+        JLabel lblStBadge = new JLabel(b.isTersedia() ? "  TERSEDIA  " : "  SEDANG DISEWA  ");
+        lblStBadge.setFont(Theme.FONT_SMALL_BOLD);
+        lblStBadge.setForeground(b.isTersedia() ? Theme.EMERALD : Theme.CORAL_RED);
+        lblStBadge.setOpaque(true);
+        lblStBadge.setBackground(b.isTersedia() ? Theme.EMERALD_BG : Theme.CORAL_BG);
+
+        badgeRow.add(lblKatBadge);
+        badgeRow.add(lblStBadge);
+
+        // Nama Produk
+        JLabel lblTitle = new JLabel("<html><body style='width:310px'>" + b.getNama() + "</body></html>");
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 20));
+        lblTitle.setForeground(Theme.TEXT_PRIMARY);
+        lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Harga Harian
+        JLabel lblTarif = new JLabel(Theme.formatRupiah(b.getTarifHarian()) + " / hari");
+        lblTarif.setFont(new Font("SansSerif", Font.BOLD, 18));
+        lblTarif.setForeground(Theme.EMERALD);
+        lblTarif.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Skema Biaya / Promo Kategori
+        JLabel lblSkema = new JLabel("Skema Tarif: " + b.getKeteranganTarif());
+        lblSkema.setFont(Theme.FONT_SMALL_BOLD);
+        lblSkema.setForeground(Theme.TEXT_SECONDARY);
+        lblSkema.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Spesifikasi Lengkap dalam bentuk poin
+        JLabel lblSpecHeader = new JLabel("Spesifikasi & Kelengkapan:");
+        lblSpecHeader.setFont(Theme.FONT_BODY_BOLD);
+        lblSpecHeader.setForeground(Theme.TEXT_PRIMARY);
+        lblSpecHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+
