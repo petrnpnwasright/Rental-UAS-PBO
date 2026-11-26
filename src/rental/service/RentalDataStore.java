@@ -129,3 +129,55 @@ public class RentalDataStore {
         } catch (Exception e) {
             System.err.println("Gagal menyimpan akun.txt: " + e.getMessage());
         }
+    }
+
+    /**
+     * Memuat katalog barang dari {@code data/barang.txt}.
+     */
+    public void loadBarang() {
+        daftarBarang.getBarang().clear();
+        File file = new File(FILE_BARANG);
+        if (!file.exists()) {
+            seedBarangDefault();
+            saveBarang();
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("#")) continue;
+                String[] p = line.split("\\|");
+                if (p.length >= 7) {
+                    String kategori = p[0].trim();
+                    String id = p[1].trim();
+                    String nama = p[2].trim();
+                    double tarif = Double.parseDouble(p[3].trim());
+                    boolean tersedia = Boolean.parseBoolean(p[4].trim());
+                    String spek = p[5].trim();
+                    String paramKhusus = p[6].trim();
+
+                    Barang itemBaru;
+                    if ("IPhone".equalsIgnoreCase(kategori)) {
+                        itemBaru = new IPhone(
+                                id, nama, tarif, tersedia, spek, Double.parseDouble(paramKhusus));
+                    } else if ("Kamera".equalsIgnoreCase(kategori)) {
+                        itemBaru = new Kamera(
+                                id, nama, tarif, tersedia, spek, Double.parseDouble(paramKhusus));
+                    } else {
+                        itemBaru = new AksesorisFotografi(
+                                id, nama, tarif, tersedia, spek, paramKhusus);
+                    }
+                    if (p.length >= 8 && !p[7].trim().isEmpty()) {
+                        itemBaru.setGambarPath(p[7].trim());
+                    }
+                    daftarBarang.getBarang().add(itemBaru);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal membaca barang.txt: " + e.getMessage());
+        }
+        if (daftarBarang.getBarang().isEmpty()) {
+            seedBarangDefault();
+            saveBarang();
+        }
