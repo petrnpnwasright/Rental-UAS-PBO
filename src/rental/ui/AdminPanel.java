@@ -228,3 +228,31 @@ public class AdminPanel extends JPanel {
         JLabel lblVal = new JLabel(value);
         lblVal.setFont(new Font("SansSerif", Font.BOLD, 16));
         lblVal.setForeground(Theme.TEXT_PRIMARY);
+
+        JLabel lblBadge = new JLabel(" " + badge + " ");
+        lblBadge.setFont(new Font("SansSerif", Font.BOLD, 10));
+        lblBadge.setForeground(positive ? Theme.EMERALD : Theme.AMBER_BADGE);
+        lblBadge.setOpaque(true);
+        lblBadge.setBackground(positive ? Theme.EMERALD_BG : Theme.AMBER_BG);
+
+        bot.add(lblVal, BorderLayout.WEST);
+        bot.add(lblBadge, BorderLayout.EAST);
+
+        card.add(lblTitle, BorderLayout.NORTH);
+        card.add(bot, BorderLayout.SOUTH);
+        return card;
+    }
+
+    private JPanel buildKelolaBarangView() {
+        JPanel view = new JPanel(new BorderLayout(0, 14));
+        view.setOpaque(false);
+
+        RoundedPanel formCard = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        formCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+
+        JLabel lblTitle = new JLabel("Kelola Katalog Barang (Tambah / Edit / Hapus)");
+        lblTitle.setFont(Theme.FONT_H2);
+        lblTitle.setForeground(Theme.TEXT_PRIMARY);
+
+        JPanel fieldsGrid = new JPanel(new GridLayout(2, 3, 12, 10));
+        fieldsGrid.setOpaque(false);
