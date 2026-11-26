@@ -358,3 +358,58 @@ public class RentalDataStore {
             }
         }
         return String.format("TRX-%03d", max + 1);
+    }
+
+    /**
+     * Menghasilkan kode barang berikutnya berdasarkan prefix kategori (IPH / KMR / AKS).
+     *
+     * @param prefix awalan kode kategori
+     * @return ID barang baru yang belum digunakan
+     */
+    public String generateNextBarangId(String prefix) {
+        int max = 0;
+        for (Barang b : daftarBarang.getBarang()) {
+            if (b.getId().toUpperCase().startsWith(prefix.toUpperCase())) {
+                String num = b.getId().replaceAll("[^0-9]", "");
+                if (!num.isEmpty()) {
+                    try {
+                        max = Math.max(max, Integer.parseInt(num));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        }
+        return String.format("%s-%02d", prefix.toUpperCase(), max + 1);
+    }
+
+    private Penyewa cariPenyewa(String username) {
+        for (Akun a : daftarAkun) {
+            if (a instanceof Penyewa && a.getUsername().equalsIgnoreCase(username)) {
+                return (Penyewa) a;
+            }
+        }
+        return null;
+    }
+
+    private Pembayaran buatPembayaranDariNama(String nama) {
+        if ("Transfer Bank".equalsIgnoreCase(nama)) {
+            return new TransferBank();
+        } else if ("QRIS".equalsIgnoreCase(nama)) {
+            return new QRIS();
+        } else {
+            return new Tunai();
+        }
+    }
+
+    public List<Akun> getDaftarAkun() {
+        return daftarAkun;
+    }
+
+    public DaftarBarang getDaftarBarang() {
+        return daftarBarang;
+    }
+
+    public List<Transaksi> getDaftarTransaksi() {
+        return daftarTransaksi;
+    }
+}
