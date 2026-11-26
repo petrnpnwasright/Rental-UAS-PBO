@@ -166,3 +166,65 @@ public class AdminPanel extends JPanel {
         leftTitle.setOpaque(false);
         leftTitle.setLayout(new BoxLayout(leftTitle, BoxLayout.Y_AXIS));
 
+        JLabel lblSub = new JLabel("Cash Flow & Pendapatan Studio");
+        lblSub.setFont(Theme.FONT_H2);
+        lblSub.setForeground(Theme.TEXT_PRIMARY);
+
+        JLabel lblAmount = new JLabel(Theme.formatRupiah(totalPendapatan));
+        lblAmount.setFont(Theme.FONT_HERO);
+        lblAmount.setForeground(Theme.TEXT_PRIMARY);
+
+        leftTitle.add(lblSub);
+        leftTitle.add(Box.createVerticalStrut(4));
+        leftTitle.add(lblAmount);
+
+        JPanel quickNavPills = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        quickNavPills.setOpaque(false);
+        RoundedButton btnToTrx = new RoundedButton(
+                "Antrean (" + pendingCount + ")", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnToTrx.setBorder(BorderFactory.createEmptyBorder(7, 14, 7, 14));
+        btnToTrx.addActionListener(e -> switchTab("TRANSAKSI"));
+
+        RoundedButton btnToRet = new RoundedButton(
+                "Pengembalian (" + aktifCount + ")", Theme.BG_CARD_ALT, new Color(232, 237, 232), Theme.TEXT_PRIMARY, 16);
+        btnToRet.setBorderColor(Theme.BORDER_SUBTLE);
+        btnToRet.setBorder(BorderFactory.createEmptyBorder(7, 14, 7, 14));
+        btnToRet.addActionListener(e -> switchTab("PENGEMBALIAN"));
+
+        quickNavPills.add(btnToTrx);
+        quickNavPills.add(btnToRet);
+
+        revHeader.add(leftTitle, BorderLayout.WEST);
+        revHeader.add(quickNavPills, BorderLayout.EAST);
+
+        AnalyticsChartPanel cashFlowChart = new AnalyticsChartPanel(
+                AnalyticsChartPanel.Mode.AREA_REVENUE,
+                new double[]{450, 720, 610, 980, 890, Math.max(1250, totalPendapatan / 1000.0), 760, 840},
+                new String[]{"Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"});
+
+        revenueCard.add(revHeader, BorderLayout.NORTH);
+        revenueCard.add(cashFlowChart, BorderLayout.CENTER);
+
+        JPanel topStack = new JPanel(new BorderLayout(0, 14));
+        topStack.setOpaque(false);
+        topStack.add(greetRow, BorderLayout.NORTH);
+        topStack.add(kpiRow, BorderLayout.CENTER);
+
+        view.add(topStack, BorderLayout.NORTH);
+        view.add(revenueCard, BorderLayout.CENTER);
+        return view;
+    }
+
+    private JPanel createKpiCard(String title, String value, String badge, boolean positive) {
+        RoundedPanel card = new RoundedPanel(new BorderLayout(0, 8), 20, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        card.setBorder(BorderFactory.createEmptyBorder(14, 16, 14, 16));
+
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setFont(Theme.FONT_SMALL_BOLD);
+        lblTitle.setForeground(Theme.TEXT_SECONDARY);
+
+        JPanel bot = new JPanel(new BorderLayout(6, 0));
+        bot.setOpaque(false);
+        JLabel lblVal = new JLabel(value);
+        lblVal.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lblVal.setForeground(Theme.TEXT_PRIMARY);
