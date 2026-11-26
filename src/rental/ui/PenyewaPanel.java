@@ -619,3 +619,90 @@ public class PenyewaPanel extends JPanel {
         dialog.add(outerPad, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
+
+    private JPanel buildRightWalletAndActivityPanel() {
+        JPanel right = new JPanel(new BorderLayout(0, 14));
+        right.setOpaque(false);
+
+        RoundedPanel walletWrapper = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        walletWrapper.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JPanel walletHeader = new JPanel(new BorderLayout());
+        walletHeader.setOpaque(false);
+        JLabel lblWalletTitle = new JLabel("Keranjang Sewa");
+        lblWalletTitle.setFont(Theme.FONT_H2);
+        lblWalletTitle.setForeground(Theme.TEXT_PRIMARY);
+
+        lblCartCount = new JLabel("0 Item");
+        lblCartCount.setFont(Theme.FONT_SMALL_BOLD);
+        lblCartCount.setForeground(Theme.EMERALD);
+
+        walletHeader.add(lblWalletTitle, BorderLayout.WEST);
+        walletHeader.add(lblCartCount, BorderLayout.EAST);
+
+        // Kartu Gelap ala Visa Card di Monetra
+        GradientCardPanel passCard = new GradientCardPanel(
+                new BorderLayout(0, 10), 20,
+                Theme.GRADIENT_CARD_TOP, Theme.GRADIENT_CARD_BOT);
+        passCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+
+        JPanel cardTop = new JPanel(new BorderLayout());
+        cardTop.setOpaque(false);
+        JLabel lblPass = new JLabel("STUDIO PASS");
+        lblPass.setFont(Theme.FONT_SMALL_BOLD);
+        lblPass.setForeground(Theme.ACCENT_LIME);
+        JLabel lblBrandCard = new JLabel("RENTAL");
+        lblBrandCard.setFont(new Font("SansSerif", Font.BOLD, 12));
+        lblBrandCard.setForeground(Color.WHITE);
+        cardTop.add(lblPass, BorderLayout.WEST);
+        cardTop.add(lblBrandCard, BorderLayout.EAST);
+
+        JPanel totalBox = new JPanel();
+        totalBox.setOpaque(false);
+        totalBox.setLayout(new BoxLayout(totalBox, BoxLayout.Y_AXIS));
+        JLabel lblEstTitle = new JLabel("Estimasi Total Tagihan");
+        lblEstTitle.setFont(Theme.FONT_SMALL);
+        lblEstTitle.setForeground(new Color(195, 208, 198));
+
+        lblCartTotal = new JLabel("Rp0");
+        lblCartTotal.setFont(new Font("SansSerif", Font.BOLD, 22));
+        lblCartTotal.setForeground(Color.WHITE);
+
+        JLabel lblHolder = new JLabel(penyewa.getNamaLengkap() + "  •  " + penyewa.getId());
+        lblHolder.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        lblHolder.setForeground(new Color(170, 185, 173));
+
+        totalBox.add(lblEstTitle);
+        totalBox.add(Box.createVerticalStrut(2));
+        totalBox.add(lblCartTotal);
+        totalBox.add(Box.createVerticalStrut(6));
+        totalBox.add(lblHolder);
+
+        passCard.add(cardTop, BorderLayout.NORTH);
+        passCard.add(totalBox, BorderLayout.SOUTH);
+
+        cartItemsContainer = new JPanel();
+        cartItemsContainer.setOpaque(false);
+        cartItemsContainer.setLayout(new BoxLayout(cartItemsContainer, BoxLayout.Y_AXIS));
+
+        JScrollPane cartScroll = new JScrollPane(cartItemsContainer);
+        cartScroll.setOpaque(false);
+        cartScroll.getViewport().setOpaque(false);
+        cartScroll.setBorder(null);
+        cartScroll.setPreferredSize(new Dimension(290, 115));
+
+        JPanel controls = new JPanel();
+        controls.setOpaque(false);
+        controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
+
+        JPanel durRow = new JPanel(new BorderLayout(8, 0));
+        durRow.setOpaque(false);
+        JLabel lblDur = new JLabel("Lama Sewa (Hari):");
+        lblDur.setFont(Theme.FONT_SMALL_BOLD);
+        lblDur.setForeground(Theme.TEXT_SECONDARY);
+        spnLamaSewa = new JSpinner(new SpinnerNumberModel(1, 1, 60, 1));
+        spnLamaSewa.setPreferredSize(new Dimension(80, 30));
+        spnLamaSewa.addChangeListener(e -> updateEstimatedTotal());
+        durRow.add(lblDur, BorderLayout.WEST);
+        durRow.add(spnLamaSewa, BorderLayout.EAST);
+
