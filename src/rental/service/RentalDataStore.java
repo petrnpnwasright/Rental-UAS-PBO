@@ -181,3 +181,53 @@ public class RentalDataStore {
             seedBarangDefault();
             saveBarang();
         }
+    }
+
+    private void seedBarangDefault() {
+        daftarBarang.getBarang().add(new IPhone(
+                "IPH-01", "iPhone 16 Pro Max 256GB", 275000, true,
+                "Desert Titanium, ProRes 4K120, Battery Health 100%", 35000));
+        daftarBarang.getBarang().add(new IPhone(
+                "IPH-02", "iPhone 15 Pro 128GB", 220000, true,
+                "Natural Titanium, Apple Log, USB-C 10Gbps", 30000));
+        daftarBarang.getBarang().add(new IPhone(
+                "IPH-03", "iPhone 14 Pro Max 256GB", 185000, true,
+                "Deep Purple, 48MP Main ProRAW, Dynamic Island", 25000));
+
+        daftarBarang.getBarang().add(new Kamera(
+                "KMR-01", "Sony Alpha A7 IV Body Only", 350000, true,
+                "33MP Full-Frame Exmor R, 4K 60p 10-bit 4:2:2", 40000));
+        daftarBarang.getBarang().add(new Kamera(
+                "KMR-02", "Canon EOS R6 Mark II", 330000, true,
+                "24.2MP Full-Frame CMOS, Dual Pixel AF II, 40fps", 40000));
+        daftarBarang.getBarang().add(new Kamera(
+                "KMR-03", "Fujifilm X100VI Silver", 260000, true,
+                "40.2MP X-Trans 5 HR, IBIS 6-Stop, Film Simulation", 30000));
+
+        daftarBarang.getBarang().add(new AksesorisFotografi(
+                "AKS-01", "DJI Ronin RS 3 Pro Gimbal", 140000, true,
+                "Carbon Fiber Arms, Payload 4.5kg, LiDAR Support", "Stabilizer Gimbal"));
+        daftarBarang.getBarang().add(new AksesorisFotografi(
+                "AKS-02", "Sony FE 24-70mm f/2.8 GM II", 175000, true,
+                "G-Master Constant f/2.8, E-Mount Full Frame", "Lensa Zoom"));
+        daftarBarang.getBarang().add(new AksesorisFotografi(
+                "AKS-03", "Godox SL-60W LED Studio Kit", 95000, true,
+                "60W 5600K Daylight + Softbox Octagon 80cm + Stand", "Studio Lighting"));
+    }
+
+    /**
+     * Menyimpan seluruh katalog barang ke dalam {@code data/barang.txt}.
+     */
+    public void saveBarang() {
+        try (PrintWriter pw = new PrintWriter(
+                new OutputStreamWriter(new FileOutputStream(FILE_BARANG), StandardCharsets.UTF_8))) {
+            pw.println("# Format: KATEGORI|ID|NAMA|TARIF_HARIAN|TERSEDIA|SPESIFIKASI|PARAM_KHUSUS|GAMBAR_PATH");
+            for (Barang b : daftarBarang.getBarang()) {
+                pw.println(b.getKategori() + "|" + b.getId() + "|" + b.getNama() + "|"
+                        + b.getTarifHarian() + "|" + b.isTersedia() + "|"
+                        + b.getSpesifikasi().replace("|", ",") + "|" + b.getParameterKhususRaw() + "|"
+                        + b.getGambarPath());
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal menyimpan barang.txt: " + e.getMessage());
+        }
