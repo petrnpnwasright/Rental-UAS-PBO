@@ -302,3 +302,59 @@ public class RentalDataStore {
         } catch (Exception e) {
             System.err.println("Gagal membaca transaksi.txt: " + e.getMessage());
         }
+    }
+
+    /**
+     * Menyimpan seluruh daftar transaksi ke dalam {@code data/transaksi.txt}.
+     */
+    public void saveTransaksi() {
+        try (PrintWriter pw = new PrintWriter(
+                new OutputStreamWriter(new FileOutputStream(FILE_TRANSAKSI), StandardCharsets.UTF_8))) {
+            pw.println("# Format: ID|USERNAME|ITEM_IDS|LAMA_SEWA|TGL_SEWA|JATUH_TEMPO|TGL_KEMBALI|STATUS|METODE_BAYAR|DENDA|TOTAL");
+            for (Transaksi t : daftarTransaksi) {
+                StringBuilder ids = new StringBuilder();
+                for (int i = 0; i < t.getBarang().size(); i++) {
+                    if (i > 0) ids.append(",");
+                    ids.append(t.getBarang().get(i).getId());
+                }
+                String tglKembali = (t.getTanggalKembali() != null)
+                        ? t.getTanggalKembali().toString()
+                        : "NULL";
+                double denda = (t.getInvoice() != null) ? t.getInvoice().getDenda() : 0.0;
+                double total = (t.getInvoice() != null) ? t.getInvoice().getTotal() : t.hitungTotalSewa();
+
+                pw.println(t.getId() + "|" + t.getPenyewa().getUsername() + "|" + ids + "|"
+                        + t.getLamaSewa() + "|" + t.getTanggalSewa() + "|" + t.getTanggalJatuhTempo() + "|"
+                        + tglKembali + "|" + t.getStatus() + "|" + t.getPembayaran().getNamaMetode() + "|"
+                        + denda + "|" + total);
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal menyimpan transaksi.txt: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Menyimpan perubahan katalog barang dan daftar transaksi sekaligus.
+     */
+    public void saveAll() {
+        saveBarang();
+        saveTransaksi();
+    }
+
+    /**
+     * Menghasilkan kode transaksi berikutnya secara berurutan (misal: TRX-001).
+     *
+     * @return ID transaksi unik
+     */
+    public String generateNextTransaksiId() {
+        int max = 0;
+        for (Transaksi t : daftarTransaksi) {
+            try {
+                String num = t.getId().replaceAll("[^0-9]", "");
+                if (!num.isEmpty()) {
+                    max = Math.max(max, Integer.parseInt(num));
+                }
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return String.format("TRX-%03d", max + 1);
