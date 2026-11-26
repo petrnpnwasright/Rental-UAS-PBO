@@ -256,3 +256,54 @@ public class PenyewaPanel extends JPanel {
         main.add(scroll, BorderLayout.CENTER);
         return main;
     }
+
+    private RoundedButton createCategoryTile(String label, String catValue) {
+        boolean active = selectedCategory.equalsIgnoreCase(catValue);
+        RoundedButton btn = new RoundedButton(
+                label,
+                active ? Theme.DARK_PILL : Theme.BG_CARD_ALT,
+                active ? Theme.DARK_PILL_HOVER : new Color(233, 238, 233),
+                active ? Color.WHITE : Theme.TEXT_PRIMARY,
+                14);
+        btn.setFont(Theme.FONT_SMALL_BOLD);
+        btn.setBorder(BorderFactory.createEmptyBorder(8, 6, 8, 6));
+        btn.addActionListener(e -> {
+            selectedCategory = catValue;
+            refreshAll();
+        });
+        return btn;
+    }
+
+    private double[] countAvailableByCategory() {
+        double iph = 0, kmr = 0, aks = 0;
+        for (Barang b : dataStore.getDaftarBarang().getBarang()) {
+            if (b.isTersedia()) {
+                if ("IPhone".equalsIgnoreCase(b.getKategori())) iph++;
+                else if ("Kamera".equalsIgnoreCase(b.getKategori())) kmr++;
+                else aks++;
+            }
+        }
+        return new double[]{iph, kmr, aks};
+    }
+
+    private void refreshCatalogGrid() {
+        if (catalogGridPanel == null) return;
+        catalogGridPanel.removeAll();
+
+        List<Barang> list = dataStore.getDaftarBarang().getBarang();
+        for (Barang b : list) {
+            if (!"SEMUA".equalsIgnoreCase(selectedCategory)
+                    && !b.getKategori().equalsIgnoreCase(selectedCategory)) {
+                continue;
+            }
+            if (!searchQuery.isEmpty()
+                    && !b.getNama().toLowerCase().contains(searchQuery)
+                    && !b.getId().toLowerCase().contains(searchQuery)
+                    && !b.getKategori().toLowerCase().contains(searchQuery)) {
+                continue;
+            }
+            catalogGridPanel.add(buildProductCard(b));
+        }
+        catalogGridPanel.revalidate();
+        catalogGridPanel.repaint();
+    }
