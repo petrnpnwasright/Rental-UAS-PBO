@@ -307,3 +307,62 @@ public class PenyewaPanel extends JPanel {
         catalogGridPanel.revalidate();
         catalogGridPanel.repaint();
     }
+
+    private JPanel buildProductCard(Barang b) {
+        RoundedPanel card = new RoundedPanel(new BorderLayout(0, 10), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        card.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        card.setToolTipText("Klik card untuk melihat detail lengkap produk");
+
+        // Header Badge Kategori & Status
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+
+        JLabel lblCat = new JLabel(" " + b.getId() + " • " + b.getKategori().toUpperCase() + " ");
+        lblCat.setFont(Theme.FONT_SMALL_BOLD);
+        lblCat.setForeground(Theme.TEXT_PRIMARY);
+        lblCat.setOpaque(true);
+        lblCat.setBackground(Theme.BG_CARD_ALT);
+
+        JLabel lblStatus = new JLabel(b.isTersedia() ? " TERSEDIA " : " SEDANG DISEWA ");
+        lblStatus.setFont(Theme.FONT_SMALL_BOLD);
+        lblStatus.setForeground(b.isTersedia() ? Theme.EMERALD : Theme.CORAL_RED);
+        lblStatus.setOpaque(true);
+        lblStatus.setBackground(b.isTersedia() ? Theme.EMERALD_BG : Theme.CORAL_BG);
+
+        top.add(lblCat, BorderLayout.WEST);
+        top.add(lblStatus, BorderLayout.EAST);
+
+        // Bagian Tengah: Gambar Produk + Info Singkat
+        JPanel centerWrap = new JPanel(new BorderLayout(0, 8));
+        centerWrap.setOpaque(false);
+
+        JPanel imgBox = ImageHelper.createProductImagePanel(
+                b.getGambarPath(), b.getNama(), b.getKategori(), 16);
+        imgBox.setPreferredSize(new Dimension(220, 130));
+
+        JPanel mid = new JPanel();
+        mid.setOpaque(false);
+        mid.setLayout(new BoxLayout(mid, BoxLayout.Y_AXIS));
+
+        JLabel lblName = new JLabel(b.getNama());
+        lblName.setFont(Theme.FONT_H2);
+        lblName.setForeground(Theme.TEXT_PRIMARY);
+
+        JLabel lblSpec = new JLabel("<html><body style='width:220px'>" + b.getSpesifikasi() + "</body></html>");
+        lblSpec.setFont(Theme.FONT_SMALL);
+        lblSpec.setForeground(Theme.TEXT_SECONDARY);
+
+        JLabel lblHintDetail = new JLabel("Lihat detail & simulasi sewa ->");
+        lblHintDetail.setFont(new Font("SansSerif", Font.BOLD, 10));
+        lblHintDetail.setForeground(Theme.EMERALD);
+
+        mid.add(lblName);
+        mid.add(Box.createVerticalStrut(3));
+        mid.add(lblSpec);
+        mid.add(Box.createVerticalStrut(5));
+        mid.add(lblHintDetail);
+
+        centerWrap.add(imgBox, BorderLayout.NORTH);
+        centerWrap.add(mid, BorderLayout.CENTER);
+
