@@ -71,3 +71,44 @@ public class PenyewaPanel extends JPanel {
         setLayout(new BorderLayout(18, 0));
         buildLayout();
     }
+
+    public void switchTab(String tab) {
+        this.activeTab = tab;
+        refreshAll();
+    }
+
+    public void setSearchQuery(String query) {
+        this.searchQuery = (query != null) ? query.trim().toLowerCase() : "";
+        if ("KATALOG".equals(activeTab)) {
+            refreshCatalogGrid();
+        }
+    }
+
+    private void buildLayout() {
+        centerContentHolder = new JPanel(new BorderLayout());
+        centerContentHolder.setOpaque(false);
+
+        JPanel rightColumn = buildRightWalletAndActivityPanel();
+        rightColumn.setPreferredSize(new Dimension(335, 620));
+
+        add(centerContentHolder, BorderLayout.CENTER);
+        add(rightColumn, BorderLayout.EAST);
+
+        refreshAll();
+    }
+
+    public void refreshAll() {
+        centerContentHolder.removeAll();
+        if ("RIWAYAT".equals(activeTab)) {
+            centerContentHolder.add(buildRiwayatView(), BorderLayout.CENTER);
+        } else {
+            centerContentHolder.add(buildKatalogView(), BorderLayout.CENTER);
+        }
+        refreshCartPanel();
+        refreshRecentActivity();
+        centerContentHolder.revalidate();
+        centerContentHolder.repaint();
+        if (onHeaderStatsRefresh != null) {
+            onHeaderStatsRefresh.run();
+        }
+    }
