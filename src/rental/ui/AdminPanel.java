@@ -340,3 +340,69 @@ public class AdminPanel extends JPanel {
                 if (nama.isEmpty()) throw new InputTidakValidException("Nama perangkat wajib diisi.");
                 double tarif = parsePositiveDouble(txtTarif.getText(), "Tarif harian");
                 String spek = txtSpek.getText().trim();
+                String khusus = txtKhusus.getText().trim();
+
+                Barang baru;
+                if ("IPhone".equals(kat)) {
+                    double asuransi = parsePositiveDouble(khusus, "Biaya asuransi");
+                    baru = new IPhone(id, nama, tarif, true, spek, asuransi);
+                } else if ("Kamera".equals(kat)) {
+                    double sensor = parsePositiveDouble(khusus, "Biaya perawatan sensor");
+                    baru = new Kamera(id, nama, tarif, true, spek, sensor);
+                } else {
+                    if (khusus.isEmpty()) khusus = "Aksesoris Studio";
+                    baru = new AksesorisFotografi(id, nama, tarif, true, spek, khusus);
+                }
+
+                dataStore.getDaftarBarang().tambahBarang(baru);
+                dataStore.saveBarang();
+                refreshAll();
+                JOptionPane.showMessageDialog(this, "Barang '" + nama + "' berhasil ditambahkan.");
+            } catch (InputTidakValidException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Validasi Input", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        RoundedButton btnEdit = new RoundedButton(
+                "Simpan Edit", Theme.EMERALD_BG, new Color(187, 247, 208), Theme.EMERALD, 14);
+        btnEdit.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnEdit.addActionListener(e -> {
+            try {
+                String id = txtId.getText().trim();
+                String nama = txtNama.getText().trim();
+                double tarif = parsePositiveDouble(txtTarif.getText(), "Tarif harian");
+                String spek = txtSpek.getText().trim();
+                Barang existing = dataStore.getDaftarBarang().cariBarangById(id);
+                if (existing == null) {
+                    throw new InputTidakValidException("Pilih barang di tabel terlebih dahulu untuk diedit.");
+                }
+                dataStore.getDaftarBarang().editBarang(id, nama, tarif, spek, existing.isTersedia());
+                if (existing instanceof IPhone) {
+                    ((IPhone) existing).setBiayaAsuransi(parsePositiveDouble(txtKhusus.getText(), "Biaya asuransi"));
+                } else if (existing instanceof Kamera) {
+                    ((Kamera) existing).setBiayaPerawatanSensor(parsePositiveDouble(txtKhusus.getText(), "Biaya sensor"));
+                } else if (existing instanceof AksesorisFotografi) {
+                    ((AksesorisFotografi) existing).setJenisAksesoris(txtKhusus.getText().trim());
+                }
+                dataStore.saveBarang();
+                refreshAll();
+                JOptionPane.showMessageDialog(this, "Perubahan barang " + id + " berhasil disimpan.");
+            } catch (InputTidakValidException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Validasi Edit", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        RoundedButton btnHapus = new RoundedButton(
+                "Hapus Barang", Theme.CORAL_BG, new Color(254, 202, 202), Theme.CORAL_RED, 14);
+        btnHapus.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnHapus.addActionListener(e -> {
+            try {
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    throw new InputTidakValidException("Pilih baris barang pada tabel yang ingin dihapus.");
+                }
+                String id = (String) model.getValueAt(row, 0);
+                dataStore.getDaftarBarang().hapusBarang(id);
+                dataStore.saveBarang();
+                refreshAll();
+                JOptionPane.showMessageDialog(this, "Barang " + id + " berhasil dihapus.");
