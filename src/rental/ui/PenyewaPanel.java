@@ -112,3 +112,43 @@ public class PenyewaPanel extends JPanel {
             onHeaderStatsRefresh.run();
         }
     }
+
+    private JPanel buildGreetingBar() {
+        JPanel bar = new JPanel(new BorderLayout(12, 0));
+        bar.setOpaque(false);
+
+        JPanel greetLeft = new JPanel();
+        greetLeft.setOpaque(false);
+        greetLeft.setLayout(new BoxLayout(greetLeft, BoxLayout.Y_AXIS));
+
+        JLabel lblHello = new JLabel("Selamat datang, " + penyewa.getNamaLengkap());
+        lblHello.setFont(Theme.FONT_HERO);
+        lblHello.setForeground(Theme.TEXT_PRIMARY);
+
+        JLabel lblSub = new JLabel("Pilih perangkat iPhone & peralatan fotografi profesional untuk disewa hari ini.");
+        lblSub.setFont(Theme.FONT_BODY);
+        lblSub.setForeground(Theme.TEXT_SECONDARY);
+
+        greetLeft.add(lblHello);
+        greetLeft.add(Box.createVerticalStrut(3));
+        greetLeft.add(lblSub);
+
+        RoundedTextField txtSearch = new RoundedTextField(18, 20);
+        txtSearch.setPreferredSize(new Dimension(235, 38));
+        txtSearch.setText(searchQuery);
+        txtSearch.setToolTipText("Cari produk iPhone / Kamera / Aksesoris...");
+        txtSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                setSearchQuery(txtSearch.getText());
+            }
+        });
+
+        JPanel searchWrap = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 6));
+        searchWrap.setOpaque(false);
+        searchWrap.add(txtSearch);
+
+        bar.add(greetLeft, BorderLayout.WEST);
+        bar.add(searchWrap, BorderLayout.EAST);
+        return bar;
+    }
