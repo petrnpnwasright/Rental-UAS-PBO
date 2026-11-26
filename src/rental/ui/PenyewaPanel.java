@@ -366,3 +366,66 @@ public class PenyewaPanel extends JPanel {
         centerWrap.add(imgBox, BorderLayout.NORTH);
         centerWrap.add(mid, BorderLayout.CENTER);
 
+        // Bagian Bawah: Harga Harian + Tombol + Keranjang
+        JPanel bottom = new JPanel(new BorderLayout(8, 0));
+        bottom.setOpaque(false);
+
+        JPanel priceBox = new JPanel();
+        priceBox.setOpaque(false);
+        priceBox.setLayout(new BoxLayout(priceBox, BoxLayout.Y_AXIS));
+        JLabel lblPrice = new JLabel(Theme.formatRupiah(b.getTarifHarian()));
+        lblPrice.setFont(new Font("SansSerif", Font.BOLD, 15));
+        lblPrice.setForeground(Theme.TEXT_PRIMARY);
+        JLabel lblPerDay = new JLabel("/ hari");
+        lblPerDay.setFont(Theme.FONT_SMALL);
+        lblPerDay.setForeground(Theme.TEXT_MUTED);
+        priceBox.add(lblPrice);
+        priceBox.add(lblPerDay);
+
+        RoundedButton btnAdd = new RoundedButton(
+                b.isTersedia() ? "+ Keranjang" : "Disewa",
+                b.isTersedia() ? Theme.ACCENT_LIME : Theme.BG_CARD_ALT,
+                Theme.ACCENT_LIME_HOVER,
+                b.isTersedia() ? Theme.DARK_PILL : Theme.TEXT_MUTED,
+                16);
+        btnAdd.setEnabled(b.isTersedia());
+        btnAdd.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnAdd.addActionListener(e -> {
+            try {
+                penyewa.getKeranjang().tambahBarang(b);
+                refreshCartPanel();
+            } catch (BarangTidakTersediaException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Barang Tidak Tersedia", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        bottom.add(priceBox, BorderLayout.WEST);
+        bottom.add(btnAdd, BorderLayout.EAST);
+
+        card.add(top, BorderLayout.NORTH);
+        card.add(centerWrap, BorderLayout.CENTER);
+        card.add(bottom, BorderLayout.SOUTH);
+
+        // Klik pada card membuka modal detail produk ala e-commerce
+        MouseAdapter cardClickListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                tampilkanDetailProdukECommerce(b);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                card.setBorderColor(Theme.EMERALD);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                card.setBorderColor(Theme.BORDER_SUBTLE);
+            }
+        };
+        card.addMouseListener(cardClickListener);
+        imgBox.addMouseListener(cardClickListener);
+
+        return card;
+    }
