@@ -202,3 +202,57 @@ public class PenyewaPanel extends JPanel {
         lblBigUnit.setFont(new Font("SansSerif", Font.BOLD, 20));
         lblBigUnit.setForeground(Theme.TEXT_PRIMARY);
 
+        JPanel catTiles = new JPanel(new GridLayout(1, 3, 8, 0));
+        catTiles.setOpaque(false);
+        catTiles.add(createCategoryTile("iPhone", "IPhone"));
+        catTiles.add(createCategoryTile("Kamera", "Kamera"));
+        catTiles.add(createCategoryTile("Aksesoris", "Aksesoris Fotografi"));
+
+        smartCard.add(smartTop, BorderLayout.NORTH);
+        smartCard.add(lblBigUnit, BorderLayout.CENTER);
+        smartCard.add(catTiles, BorderLayout.SOUTH);
+
+        // Kartu Kanan: Distribusi Stok per Kategori (Bar Chart bergaya Monetra)
+        RoundedPanel chartCard = new RoundedPanel(new BorderLayout(0, 6), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        chartCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 12, 18));
+
+        JPanel chTop = new JPanel(new BorderLayout());
+        chTop.setOpaque(false);
+        JLabel lblChTitle = new JLabel("Ketersediaan Kategori");
+        lblChTitle.setFont(Theme.FONT_H2);
+        lblChTitle.setForeground(Theme.TEXT_PRIMARY);
+        JLabel lblTrend = new JLabel("  Real-Time  ");
+        lblTrend.setFont(Theme.FONT_SMALL_BOLD);
+        lblTrend.setForeground(Theme.EMERALD);
+        lblTrend.setOpaque(true);
+        lblTrend.setBackground(Theme.EMERALD_BG);
+        chTop.add(lblChTitle, BorderLayout.WEST);
+        chTop.add(lblTrend, BorderLayout.EAST);
+
+        double[] catCounts = countAvailableByCategory();
+        AnalyticsChartPanel barChart = new AnalyticsChartPanel(
+                AnalyticsChartPanel.Mode.BAR_CATEGORY,
+                catCounts,
+                new String[]{"iPhone", "Kamera", "Aksesoris"});
+
+        chartCard.add(chTop, BorderLayout.NORTH);
+        chartCard.add(barChart, BorderLayout.CENTER);
+
+        topRow.add(smartCard);
+        topRow.add(chartCard);
+        northContainer.add(topRow, BorderLayout.CENTER);
+
+        catalogGridPanel = new JPanel(new GridLayout(0, 2, 14, 14));
+        catalogGridPanel.setOpaque(false);
+        refreshCatalogGrid();
+
+        JScrollPane scroll = new JScrollPane(catalogGridPanel);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        main.add(northContainer, BorderLayout.NORTH);
+        main.add(scroll, BorderLayout.CENTER);
+        return main;
+    }
