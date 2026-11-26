@@ -406,3 +406,77 @@ public class AdminPanel extends JPanel {
                 dataStore.saveBarang();
                 refreshAll();
                 JOptionPane.showMessageDialog(this, "Barang " + id + " berhasil dihapus.");
+            } catch (InputTidakValidException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Gagal Menghapus", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        RoundedButton btnPilihFoto = new RoundedButton(
+                "Pilih Foto...", Theme.BG_CARD_ALT, new Color(232, 237, 232), Theme.TEXT_PRIMARY, 14);
+        btnPilihFoto.setBorderColor(Theme.BORDER_SUBTLE);
+        btnPilihFoto.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnPilihFoto.addActionListener(e -> {
+            String id = txtId.getText().trim();
+            if (id.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Isi atau pilih ID Barang terlebih dahulu.");
+                return;
+            }
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileFilter(new FileNameExtensionFilter("Gambar (PNG, JPG, JPEG)", "png", "jpg", "jpeg"));
+            if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File srcFile = chooser.getSelectedFile();
+                    File destDir = new File("assets/products");
+                    if (!destDir.exists()) destDir.mkdirs();
+
+                    String name = srcFile.getName();
+                    String ext = name.contains(".") ? name.substring(name.lastIndexOf(".")) : ".png";
+                    File destFile = new File(destDir, id + ext.toLowerCase());
+                    Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                    Barang existing = dataStore.getDaftarBarang().cariBarangById(id);
+                    if (existing != null) {
+                        existing.setGambarPath("assets/products/" + destFile.getName());
+                        dataStore.saveBarang();
+                    }
+                    JOptionPane.showMessageDialog(this, "Foto berhasil disimpan ke: " + destFile.getPath());
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Gagal menyalin gambar: " + ex.getMessage());
+                }
+            }
+        });
+        btnRow.add(btnPilihFoto);
+
+        btnRow.add(btnHapus);
+        btnRow.add(btnEdit);
+        btnRow.add(btnTambah);
+
+        formCard.add(lblTitle, BorderLayout.NORTH);
+        formCard.add(fieldsGrid, BorderLayout.CENTER);
+        formCard.add(btnRow, BorderLayout.SOUTH);
+
+        RoundedPanel tableCard = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        tableCard.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        JScrollPane sp = new JScrollPane(table);
+        sp.getViewport().setBackground(Theme.BG_CARD);
+        sp.setBorder(null);
+        tableCard.add(sp, BorderLayout.CENTER);
+
+        view.add(formCard, BorderLayout.NORTH);
+        view.add(tableCard, BorderLayout.CENTER);
+        return view;
+    }
+
+    private JPanel buildTerimaTransaksiView() {
+        JPanel view = new JPanel(new BorderLayout(0, 14));
+        view.setOpaque(false);
+
+        RoundedPanel header = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        header.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
+
+        JPanel tBox = new JPanel();
+        tBox.setOpaque(false);
+        tBox.setLayout(new BoxLayout(tBox, BoxLayout.Y_AXIS));
+        JLabel l1 = new JLabel("Persetujuan Transaksi Sewa");
+        l1.setFont(Theme.FONT_H1);
+        l1.setForeground(Theme.TEXT_PRIMARY);
