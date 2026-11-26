@@ -231,3 +231,74 @@ public class RentalDataStore {
         } catch (Exception e) {
             System.err.println("Gagal menyimpan barang.txt: " + e.getMessage());
         }
+    }
+
+    /**
+     * Memuat seluruh riwayat transaksi dari {@code data/transaksi.txt}.
+     */
+    public void loadTransaksi() {
+        daftarTransaksi.clear();
+        for (Akun a : daftarAkun) {
+            if (a instanceof Penyewa) {
+                ((Penyewa) a).getRiwayat().clear();
+            }
+        }
+        File file = new File(FILE_TRANSAKSI);
+        if (!file.exists()) {
+            saveTransaksi();
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("#")) continue;
+                String[] p = line.split("\\|");
+                if (p.length >= 11) {
+                    String idTrx = p[0].trim();
+                    String usernamePenyewa = p[1].trim();
+                    String[] itemIds = p[2].trim().split(",");
+                    int lamaSewa = Integer.parseInt(p[3].trim());
+                    LocalDate tglSewa = LocalDate.parse(p[4].trim());
+                    LocalDate tglJatuhTempo = LocalDate.parse(p[5].trim());
+                    String tglKembaliStr = p[6].trim();
+                    String status = p[7].trim();
+                    String metodeBayar = p[8].trim();
+                    double denda = Double.parseDouble(p[9].trim());
+                    double total = Double.parseDouble(p[10].trim());
+
+                    Penyewa penyewa = cariPenyewa(usernamePenyewa);
+                    if (penyewa == null) continue;
+
+                    ArrayList<Barang> items = new ArrayList<>();
+                    for (String itemId : itemIds) {
+                        Barang b = daftarBarang.cariBarangById(itemId.trim());
+                        if (b != null) {
+                            items.add(b);
+                        }
+                    }
+                    if (items.isEmpty()) continue;
+
+                    Pembayaran pemb = buatPembayaranDariNama(metodeBayar);
+                    Transaksi trx = new Transaksi(idTrx, penyewa, items, lamaSewa, tglSewa, pemb);
+                    trx.setTanggalJatuhTempo(tglJatuhTempo);
+                    if (!"NULL".equalsIgnoreCase(tglKembaliStr) && !tglKembaliStr.isEmpty()) {
+                        trx.setTanggalKembali(LocalDate.parse(tglKembaliStr));
+                    }
+                    trx.ubahStatus(status);
+
+                    if ("DISEWA".equals(status) || "SELESAI".equals(status)) {
+                        pemb.prosesPembayaran(trx.hitungTotalSewa());
+                        Invoice inv = new Invoice("INV-" + idTrx, trx);
+                        inv.setDenda(denda);
+                        inv.setTotal(total);
+                        trx.setInvoice(inv);
+                    }
+
+                    daftarTransaksi.add(trx);
+                    penyewa.getRiwayat().add(trx);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal membaca transaksi.txt: " + e.getMessage());
+        }
