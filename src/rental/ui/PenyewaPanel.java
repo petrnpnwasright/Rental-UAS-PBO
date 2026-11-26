@@ -522,3 +522,100 @@ public class PenyewaPanel extends JPanel {
         lblSpecHeader.setForeground(Theme.TEXT_PRIMARY);
         lblSpecHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        String[] specs = b.getSpesifikasi().split(",");
+        StringBuilder bulletHtml = new StringBuilder("<html><body style='width:305px'>");
+        for (String s : specs) {
+            bulletHtml.append("• ").append(s.trim()).append("<br>");
+        }
+        bulletHtml.append("• Denda keterlambatan: Rp 50.000 / hari</body></html>");
+
+        JLabel lblSpecDetail = new JLabel(bulletHtml.toString());
+        lblSpecDetail.setFont(Theme.FONT_SMALL);
+        lblSpecDetail.setForeground(Theme.TEXT_SECONDARY);
+        lblSpecDetail.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Simulasi Kalkulator Biaya Sewa di dalam Modal Detail
+        RoundedPanel calcBox = new RoundedPanel(new BorderLayout(8, 6), 14, Theme.BG_CARD_ALT, Theme.BORDER_SUBTLE);
+        calcBox.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
+        calcBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        calcBox.setMaximumSize(new Dimension(360, 74));
+
+        JPanel simTop = new JPanel(new BorderLayout());
+        simTop.setOpaque(false);
+        JLabel lblSimDur = new JLabel("Simulasi Durasi Sewa (Hari):");
+        lblSimDur.setFont(Theme.FONT_SMALL_BOLD);
+        lblSimDur.setForeground(Theme.TEXT_PRIMARY);
+
+        JSpinner spnSimHari = new JSpinner(new SpinnerNumberModel(1, 1, 60, 1));
+        spnSimHari.setPreferredSize(new Dimension(65, 26));
+        simTop.add(lblSimDur, BorderLayout.WEST);
+        simTop.add(spnSimHari, BorderLayout.EAST);
+
+        JLabel lblSimTotal = new JLabel("Estimasi Biaya: " + Theme.formatRupiah(b.hitungBiaya(1)));
+        lblSimTotal.setFont(Theme.FONT_BODY_BOLD);
+        lblSimTotal.setForeground(Theme.TEXT_PRIMARY);
+
+        spnSimHari.addChangeListener(e -> {
+            int h = (Integer) spnSimHari.getValue();
+            lblSimTotal.setText("Estimasi Biaya (" + h + " hari): " + Theme.formatRupiah(b.hitungBiaya(h)));
+        });
+
+        calcBox.add(simTop, BorderLayout.NORTH);
+        calcBox.add(lblSimTotal, BorderLayout.SOUTH);
+
+        infoStack.add(badgeRow);
+        infoStack.add(Box.createVerticalStrut(10));
+        infoStack.add(lblTitle);
+        infoStack.add(Box.createVerticalStrut(6));
+        infoStack.add(lblTarif);
+        infoStack.add(Box.createVerticalStrut(4));
+        infoStack.add(lblSkema);
+        infoStack.add(Box.createVerticalStrut(12));
+        infoStack.add(lblSpecHeader);
+        infoStack.add(Box.createVerticalStrut(4));
+        infoStack.add(lblSpecDetail);
+        infoStack.add(Box.createVerticalStrut(12));
+        infoStack.add(calcBox);
+
+        // Tombol Bawah Modal (Tambah ke Keranjang & Tutup)
+        JPanel actionRow = new JPanel(new GridLayout(1, 2, 10, 0));
+        actionRow.setOpaque(false);
+
+        RoundedButton btnClose = new RoundedButton(
+                "Tutup", Theme.BG_CARD, Theme.BG_CARD_ALT, Theme.TEXT_PRIMARY, 16);
+        btnClose.setBorderColor(Theme.BORDER_SUBTLE);
+        btnClose.setPreferredSize(new Dimension(120, 40));
+        btnClose.addActionListener(e -> dialog.dispose());
+
+        RoundedButton btnAddModal = new RoundedButton(
+                b.isTersedia() ? "+ Tambah ke Keranjang" : "Unit Sedang Disewa",
+                b.isTersedia() ? Theme.ACCENT_LIME : Theme.BG_CARD_ALT,
+                Theme.ACCENT_LIME_HOVER,
+                b.isTersedia() ? Theme.DARK_PILL : Theme.TEXT_MUTED,
+                16);
+        btnAddModal.setEnabled(b.isTersedia());
+        btnAddModal.setPreferredSize(new Dimension(170, 40));
+        btnAddModal.addActionListener(e -> {
+            try {
+                penyewa.getKeranjang().tambahBarang(b);
+                spnLamaSewa.setValue(spnSimHari.getValue());
+                refreshCartPanel();
+                dialog.dispose();
+            } catch (BarangTidakTersediaException ex) {
+                JOptionPane.showMessageDialog(dialog, ex.getMessage(),
+                        "Barang Tidak Tersedia", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        actionRow.add(btnClose);
+        actionRow.add(btnAddModal);
+
+        rightCol.add(infoStack, BorderLayout.CENTER);
+        rightCol.add(actionRow, BorderLayout.SOUTH);
+
+        container.add(leftCol);
+        container.add(rightCol);
+
+        dialog.add(outerPad, BorderLayout.CENTER);
+        dialog.setVisible(true);
+    }
