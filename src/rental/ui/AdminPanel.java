@@ -71,3 +71,33 @@ public class AdminPanel extends JPanel {
 
         refreshAll();
     }
+
+    public void switchTab(String tab) {
+        this.activeTab = tab;
+        refreshAll();
+    }
+
+    public void refreshAll() {
+        mainHolder.removeAll();
+        if ("BARANG".equals(activeTab)) {
+            mainHolder.add(buildKelolaBarangView(), BorderLayout.CENTER);
+        } else if ("TRANSAKSI".equals(activeTab)) {
+            mainHolder.add(buildTerimaTransaksiView(), BorderLayout.CENTER);
+        } else if ("PENGEMBALIAN".equals(activeTab)) {
+            mainHolder.add(buildPengembalianView(), BorderLayout.CENTER);
+        } else {
+            mainHolder.add(buildOverviewView(), BorderLayout.CENTER);
+        }
+
+        rightSummaryHolder.removeAll();
+        rightSummaryHolder.add(buildRightAdminPanel(), BorderLayout.CENTER);
+
+        mainHolder.revalidate();
+        mainHolder.repaint();
+        rightSummaryHolder.revalidate();
+        rightSummaryHolder.repaint();
+
+        if (onHeaderStatsRefresh != null) {
+            onHeaderStatsRefresh.run();
+        }
+    }
