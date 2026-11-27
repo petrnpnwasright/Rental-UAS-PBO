@@ -72,3 +72,69 @@ public class MainDashboardFrame extends JFrame {
         add(rootPadding, BorderLayout.CENTER);
         updateHeaderBadge();
     }
+    
+    private void selectNavigation(int index, Runnable action) {
+        activeNavIndex = index;
+        if (navButtons != null) {
+            for (JButton nb : navButtons) {
+                if (nb != null) nb.repaint();
+            }
+        }
+        if (topNavPills != null) {
+            for (int i = 0; i < topNavPills.length; i++) {
+                if (topNavPills[i] != null) {
+                    boolean active = (i == index);
+                    topNavPills[i].setForeground(active ? Theme.TEXT_PRIMARY : Theme.TEXT_SECONDARY);
+                    topNavPills[i].setFont(active ? Theme.FONT_SMALL_BOLD : Theme.FONT_SMALL);
+                }
+            }
+        }
+        action.run();
+    }
+
+    private JPanel buildLeftSidebar() {
+        JPanel sidebarHolder = new JPanel(new BorderLayout(0, 14));
+        sidebarHolder.setOpaque(false);
+        sidebarHolder.setPreferredSize(new Dimension(60, 680));
+
+        RoundedPanel topRail = new RoundedPanel(new BorderLayout(), 28, Theme.BG_SIDEBAR, Theme.BORDER_SUBTLE);
+        topRail.setBorder(BorderFactory.createEmptyBorder(12, 7, 12, 7));
+
+        JPanel navStack = new JPanel();
+        navStack.setOpaque(false);
+        navStack.setLayout(new BoxLayout(navStack, BoxLayout.Y_AXIS));
+
+        if (akunAktif instanceof Admin) {
+            navButtons = new JButton[4];
+            navButtons[0] = createNavIconButton(0, "Dashboard Ringkasan", "GRID", () -> adminPanel.switchTab("OVERVIEW"));
+            navButtons[1] = createNavIconButton(1, "Kelola Katalog Barang", "BOX", () -> adminPanel.switchTab("BARANG"));
+            navButtons[2] = createNavIconButton(2, "Persetujuan Transaksi", "CHECK", () -> adminPanel.switchTab("TRANSAKSI"));
+            navButtons[3] = createNavIconButton(3, "Pengembalian & Denda", "CLOCK", () -> adminPanel.switchTab("PENGEMBALIAN"));
+        } else {
+            navButtons = new JButton[2];
+            navButtons[0] = createNavIconButton(0, "Dashboard & Katalog Sewa", "GRID", () -> penyewaPanel.switchTab("KATALOG"));
+            navButtons[1] = createNavIconButton(1, "Riwayat Sewa & Invoice", "RECEIPT", () -> penyewaPanel.switchTab("RIWAYAT"));
+        }
+
+        for (int i = 0; i < navButtons.length; i++) {
+            navStack.add(navButtons[i]);
+            if (i < navButtons.length - 1) {
+                navStack.add(Box.createVerticalStrut(10));
+            }
+        }
+        topRail.add(navStack, BorderLayout.NORTH);
+
+        RoundedPanel bottomRail = new RoundedPanel(new BorderLayout(), 28, Theme.BG_SIDEBAR, Theme.BORDER_SUBTLE);
+        bottomRail.setBorder(BorderFactory.createEmptyBorder(10, 7, 10, 7));
+
+        JButton btnLogout = createNavIconButton(-1, "Keluar / Ganti Akun", "LOGOUT", () -> {
+            Main.setAkunAktif(null);
+            new LoginFrame(dataStore).setVisible(true);
+            dispose();
+        });
+        bottomRail.add(btnLogout, BorderLayout.CENTER);
+
+        sidebarHolder.add(topRail, BorderLayout.CENTER);
+        sidebarHolder.add(bottomRail, BorderLayout.SOUTH);
+        return sidebarHolder;
+    }
