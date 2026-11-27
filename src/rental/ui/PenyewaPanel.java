@@ -1057,3 +1057,49 @@ public class PenyewaPanel extends JPanel {
         card.add(right, BorderLayout.EAST);
         return card;
     }
+
+    private void tampilkanModalInvoice(Invoice invoice) {
+        if (invoice == null) return;
+        invoice.cetakInvoice();
+
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this),
+                "Invoice " + invoice.getIdInvoice(), JDialog.ModalityType.APPLICATION_MODAL);
+        dialog.setSize(560, 520);
+        dialog.setLocationRelativeTo(this);
+        dialog.getContentPane().setBackground(Theme.BG_ROOT);
+        dialog.setLayout(new BorderLayout(0, 12));
+
+        JTextArea area = new JTextArea(invoice.generateTeksInvoice());
+        area.setEditable(false);
+        area.setBackground(Theme.BG_CARD);
+        area.setForeground(Theme.TEXT_PRIMARY);
+        area.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        area.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setOpaque(false);
+        footer.setBorder(BorderFactory.createEmptyBorder(0, 16, 14, 16));
+
+        JLabel lblSaved = new JLabel("Tersimpan otomatis ke: data/invoices/" + invoice.getIdInvoice() + ".txt");
+        lblSaved.setFont(Theme.FONT_SMALL_BOLD);
+        lblSaved.setForeground(Theme.EMERALD);
+
+        RoundedButton btnClose = new RoundedButton(
+                "Tutup", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 14);
+        btnClose.setBorder(BorderFactory.createEmptyBorder(6, 18, 6, 18));
+        btnClose.addActionListener(e -> dialog.dispose());
+
+        footer.add(lblSaved, BorderLayout.WEST);
+        footer.add(btnClose, BorderLayout.EAST);
+
+        dialog.add(new JScrollPane(area), BorderLayout.CENTER);
+        dialog.add(footer, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+
+    private Color getStatusColor(String status) {
+        if ("DISEWA".equalsIgnoreCase(status)) return Theme.EMERALD;
+        if ("SELESAI".equalsIgnoreCase(status)) return new Color(37, 99, 235);
+        return Theme.AMBER_BADGE;
+    }
+}
