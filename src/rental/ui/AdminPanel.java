@@ -480,3 +480,100 @@ public class AdminPanel extends JPanel {
         JLabel l1 = new JLabel("Persetujuan Transaksi Sewa");
         l1.setFont(Theme.FONT_H1);
         l1.setForeground(Theme.TEXT_PRIMARY);
+        JLabel l2 = new JLabel("Pilih transaksi berstatus MENUNGGU_KONFIRMASI lalu klik Terima Transaksi untuk mengunci stok & menerbitkan Invoice.");
+        l2.setFont(Theme.FONT_BODY);
+        l2.setForeground(Theme.TEXT_SECONDARY);
+        tBox.add(l1);
+        tBox.add(Box.createVerticalStrut(4));
+        tBox.add(l2);
+        header.add(tBox, BorderLayout.CENTER);
+
+        String[] cols = {"ID Trx", "Penyewa", "Daftar Barang", "Durasi", "Metode Bayar", "Total Biaya", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        List<Transaksi> allTrx = dataStore.getDaftarTransaksi();
+        for (int i = allTrx.size() - 1; i >= 0; i--) {
+            Transaksi t = allTrx.get(i);
+            StringBuilder items = new StringBuilder();
+            for (int j = 0; j < t.getBarang().size(); j++) {
+                if (j > 0) items.append(", ");
+                items.append(t.getBarang().get(j).getNama());
+            }
+            model.addRow(new Object[]{
+                    t.getId(),
+                    t.getPenyewa().getNamaLengkap() + " (@" + t.getPenyewa().getUsername() + ")",
+                    items.toString(),
+                    t.getLamaSewa() + " hari",
+                    t.getPembayaran().getNamaMetode(),
+                    Theme.formatRupiah(t.hitungTotalSewa()),
+                    t.getStatus()
+            });
+        }
+
+        JTable table = createStyledTable(model);
+
+        RoundedPanel tableCard = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        tableCard.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+        JScrollPane sp = new JScrollPane(table);
+        sp.getViewport().setBackground(Theme.BG_CARD);
+        sp.setBorder(null);
+
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        footer.setOpaque(false);
+
+        RoundedButton btnTerima = new RoundedButton(
+                "Terima Transaksi & Terbitkan Invoice",
+                Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnTerima.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        btnTerima.addActionListener(e -> {
+            try {
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    throw new InputTidakValidException("Silakan pilih baris transaksi pada tabel terlebih dahulu.");
+                }
+                String idTrx = (String) model.getValueAt(row, 0);
+                Transaksi target = cariTransaksi(idTrx);
+                admin.terimaTransaksi(target);
+                if (target.getInvoice() != null) {
+                    target.getInvoice().cetakInvoice();
+                }
+                dataStore.saveAll();
+                refreshAll();
+                JOptionPane.showMessageDialog(this,
+                        "Transaksi " + idTrx + " DITERIMA!\n"
+                        + "Status barang berubah menjadi SEDANG DISEWA dan Invoice "
+                        + target.getInvoice().getIdInvoice() + " telah tercetak.",
+                        "Transaksi Disetujui", JOptionPane.INFORMATION_MESSAGE);
+            } catch (BarangTidakTersediaException | InputTidakValidException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Tidak Dapat Memproses Transaksi", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        footer.add(btnTerima);
+        tableCard.add(sp, BorderLayout.CENTER);
+        tableCard.add(footer, BorderLayout.SOUTH);
+
+        view.add(header, BorderLayout.NORTH);
+        view.add(tableCard, BorderLayout.CENTER);
+        return view;
+    }
+
+    private JPanel buildPengembalianView() {
+        JPanel view = new JPanel(new BorderLayout(0, 14));
+        view.setOpaque(false);
+
+        RoundedPanel header = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        header.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
+
+        JPanel tBox = new JPanel();
+        tBox.setOpaque(false);
+        tBox.setLayout(new BoxLayout(tBox, BoxLayout.Y_AXIS));
+        JLabel l1 = new JLabel("Konfirmasi Pengembalian & Perhitungan Denda");
+        l1.setFont(Theme.FONT_H1);
+        l1.setForeground(Theme.TEXT_PRIMARY);
