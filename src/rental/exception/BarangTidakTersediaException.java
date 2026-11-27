@@ -1,4 +1,4 @@
-﻿package rental.exception;
+package rental.exception;
 
 /**
  * Exception yang dilempar ketika penyewa mencoba menyewa atau memasukkan barang

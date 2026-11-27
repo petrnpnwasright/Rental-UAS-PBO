@@ -46,7 +46,7 @@ public class MainDashboardFrame extends JFrame {
     }
 
     private void initUI() {
-        setTitle("Rental Studio — " + akunAktif.getRole() + " Dashboard (" + akunAktif.getNamaLengkap() + ")");
+        setTitle("Rental Studio â€” " + akunAktif.getRole() + " Dashboard (" + akunAktif.getNamaLengkap() + ")");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 780);
         setMinimumSize(new Dimension(1140, 700));
@@ -286,7 +286,7 @@ public class MainDashboardFrame extends JFrame {
         JLabel lblName = new JLabel(akunAktif.getNamaLengkap());
         lblName.setFont(Theme.FONT_SMALL_BOLD);
         lblName.setForeground(Theme.TEXT_PRIMARY);
-        JLabel lblUser = new JLabel("@" + akunAktif.getUsername() + " • " + akunAktif.getRole());
+        JLabel lblUser = new JLabel("@" + akunAktif.getUsername() + " " + akunAktif.getRole());
         lblUser.setFont(new Font("SansSerif", Font.PLAIN, 10));
         lblUser.setForeground(Theme.TEXT_SECONDARY);
         nameStack.add(lblName);

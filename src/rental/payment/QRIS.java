@@ -1,4 +1,4 @@
-﻿package rental.payment;
+package rental.payment;
 
 import java.text.NumberFormat;
 import java.util.Locale;

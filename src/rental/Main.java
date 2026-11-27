@@ -7,7 +7,7 @@ import rental.service.RentalDataStore;
 import rental.ui.LoginFrame;
 
 /**
- * Titik masuk utama (Entry Point) aplikasi Rental — Sistem Penyewaan iPhone &amp; Alat Fotografi.
+ * Titik masuk utama (Entry Point) aplikasi Rental â€” Sistem Penyewaan iPhone &amp; Alat Fotografi.
  * Menginisialisasi penyimpanan data persisten (.txt) dan meluncurkan antarmuka GUI berbasis Java Swing.
  *
  * @version 1.0

@@ -1,4 +1,4 @@
-﻿package rental.model;
+package rental.model;
 
 /**
  * Subclass Barang kategori Aksesoris Fotografi (Gimbal, Lensa, Lighting).

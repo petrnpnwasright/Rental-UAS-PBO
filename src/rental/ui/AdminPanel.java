@@ -698,7 +698,7 @@ public class AdminPanel extends JPanel {
                 Theme.GRADIENT_CARD_TOP, Theme.GRADIENT_CARD_BOT);
         studioCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
 
-        JLabel lblBadge = new JLabel("ADMIN ACCESS • ACTIVE");
+        JLabel lblBadge = new JLabel("ADMIN ACCESS  ACTIVE");
         lblBadge.setFont(Theme.FONT_SMALL_BOLD);
         lblBadge.setForeground(Theme.ACCENT_LIME);
 
@@ -710,7 +710,7 @@ public class AdminPanel extends JPanel {
         JPanel statsMid = new JPanel();
         statsMid.setOpaque(false);
         statsMid.setLayout(new BoxLayout(statsMid, BoxLayout.Y_AXIS));
-        JLabel lBig = new JLabel(menunggu + " Menunggu • " + disewa + " Aktif");
+        JLabel lBig = new JLabel(menunggu + " Menunggu " + disewa + " Aktif");
         lBig.setFont(new Font("SansSerif", Font.BOLD, 17));
         lBig.setForeground(Color.WHITE);
         JLabel lSub = new JLabel("Denda Keterlambatan: Rp 50.000 / hari");
@@ -771,7 +771,7 @@ public class AdminPanel extends JPanel {
                 JPanel left = new JPanel();
                 left.setOpaque(false);
                 left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
-                JLabel lName = new JLabel(t.getId() + " • " + t.getPenyewa().getNamaLengkap());
+                JLabel lName = new JLabel(t.getId() + "  " + t.getPenyewa().getNamaLengkap());
                 lName.setFont(Theme.FONT_SMALL_BOLD);
                 lName.setForeground(Theme.TEXT_PRIMARY);
                 JLabel lItemSub = new JLabel(t.getStatus() + " (" + t.getLamaSewa() + " hari)");

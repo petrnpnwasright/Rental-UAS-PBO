@@ -1,4 +1,4 @@
-﻿package rental.model;
+package rental.model;
 
 /**
  * Kelas abstrak dasar untuk seluruh pengguna sistem (Admin dan Penyewa).

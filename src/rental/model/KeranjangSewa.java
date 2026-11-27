@@ -1,4 +1,4 @@
-﻿package rental.model;
+package rental.model;
 
 import java.util.ArrayList;
 import rental.exception.BarangTidakTersediaException;

@@ -318,7 +318,7 @@ public class PenyewaPanel extends JPanel {
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
 
-        JLabel lblCat = new JLabel(" " + b.getId() + " • " + b.getKategori().toUpperCase() + " ");
+        JLabel lblCat = new JLabel(" " + b.getId() + " " + b.getKategori().toUpperCase() + " ");
         lblCat.setFont(Theme.FONT_SMALL_BOLD);
         lblCat.setForeground(Theme.TEXT_PRIMARY);
         lblCat.setOpaque(true);
@@ -436,7 +436,7 @@ public class PenyewaPanel extends JPanel {
      */
     private void tampilkanDetailProdukECommerce(Barang b) {
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this),
-                "Detail Produk — " + b.getNama(), JDialog.ModalityType.APPLICATION_MODAL);
+                "Detail Produk â€” " + b.getNama(), JDialog.ModalityType.APPLICATION_MODAL);
         dialog.setSize(760, 480);
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
@@ -483,7 +483,7 @@ public class PenyewaPanel extends JPanel {
         badgeRow.setOpaque(false);
         badgeRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel lblKatBadge = new JLabel("  " + b.getKategori().toUpperCase() + " • " + b.getId() + "  ");
+        JLabel lblKatBadge = new JLabel("  " + b.getKategori().toUpperCase() + " " + b.getId() + "  ");
         lblKatBadge.setFont(Theme.FONT_SMALL_BOLD);
         lblKatBadge.setForeground(Theme.DARK_PILL);
         lblKatBadge.setOpaque(true);
@@ -525,9 +525,9 @@ public class PenyewaPanel extends JPanel {
         String[] specs = b.getSpesifikasi().split(",");
         StringBuilder bulletHtml = new StringBuilder("<html><body style='width:305px'>");
         for (String s : specs) {
-            bulletHtml.append("• ").append(s.trim()).append("<br>");
+            bulletHtml.append("").append(s.trim()).append("<br>");
         }
-        bulletHtml.append("• Denda keterlambatan: Rp 50.000 / hari</body></html>");
+        bulletHtml.append("Denda keterlambatan: Rp 50.000 / hari</body></html>");
 
         JLabel lblSpecDetail = new JLabel(bulletHtml.toString());
         lblSpecDetail.setFont(Theme.FONT_SMALL);
@@ -668,7 +668,7 @@ public class PenyewaPanel extends JPanel {
         lblCartTotal.setFont(new Font("SansSerif", Font.BOLD, 22));
         lblCartTotal.setForeground(Color.WHITE);
 
-        JLabel lblHolder = new JLabel(penyewa.getNamaLengkap() + "  •  " + penyewa.getId());
+        JLabel lblHolder = new JLabel(penyewa.getNamaLengkap() + "   " + penyewa.getId());
         lblHolder.setFont(new Font("SansSerif", Font.PLAIN, 10));
         lblHolder.setForeground(new Color(170, 185, 173));
 
@@ -820,7 +820,7 @@ public class PenyewaPanel extends JPanel {
                 JLabel lName = new JLabel(b.getNama());
                 lName.setFont(Theme.FONT_SMALL_BOLD);
                 lName.setForeground(Theme.TEXT_PRIMARY);
-                JLabel lItemSub = new JLabel(Theme.formatRupiah(b.getTarifHarian()) + "/hari • " + b.getKategori());
+                JLabel lItemSub = new JLabel(Theme.formatRupiah(b.getTarifHarian()) + "/hari " + b.getKategori());
                 lItemSub.setFont(new Font("SansSerif", Font.PLAIN, 10));
                 lItemSub.setForeground(Theme.TEXT_SECONDARY);
                 info.add(lName);
@@ -896,7 +896,7 @@ public class PenyewaPanel extends JPanel {
                 JPanel left = new JPanel();
                 left.setOpaque(false);
                 left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
-                JLabel lId = new JLabel(t.getId() + " (" + t.getBarang().size() + " unit • " + t.getLamaSewa() + " hari)");
+                JLabel lId = new JLabel(t.getId() + " (" + t.getBarang().size() + " unit " + t.getLamaSewa() + " hari)");
                 lId.setFont(Theme.FONT_SMALL_BOLD);
                 lId.setForeground(Theme.TEXT_PRIMARY);
                 JLabel lSt = new JLabel("Status: " + t.getStatus());

@@ -1,4 +1,4 @@
-﻿package rental.exception;
+package rental.exception;
 
 /**
  * Kelas dasar exception untuk seluruh kesalahan logika bisnis pada sistem Rental.

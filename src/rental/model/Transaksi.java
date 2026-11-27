@@ -1,4 +1,4 @@
-﻿package rental.model;
+package rental.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

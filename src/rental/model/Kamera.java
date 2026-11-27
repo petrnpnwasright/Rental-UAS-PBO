@@ -1,4 +1,4 @@
-﻿package rental.model;
+package rental.model;
 
 import java.text.NumberFormat;
 import java.util.Locale;

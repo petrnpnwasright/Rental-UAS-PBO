@@ -1,4 +1,4 @@
-﻿package rental.exception;
+package rental.exception;
 
 /**
  * Exception yang dilempar ketika input dari pengguna tidak memenuhi aturan validasi,

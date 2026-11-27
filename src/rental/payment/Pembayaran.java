@@ -1,4 +1,4 @@
-﻿package rental.payment;
+package rental.payment;
 
 /**
  * Interface kontrak metode pembayaran pada sistem Rental.

@@ -1,4 +1,4 @@
-﻿package rental.model;
+package rental.model;
 
 /**
  * Kelas abstrak yang merepresentasikan item barang yang disewakan pada sistem Rental.

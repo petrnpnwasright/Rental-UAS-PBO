@@ -42,7 +42,7 @@ public class LoginFrame extends JFrame {
     }
 
     private void initUI() {
-        setTitle("Rental Studio — Sistem Penyewaan iPhone & Alat Fotografi");
+        setTitle("Rental Studio â€” Sistem Penyewaan iPhone & Alat Fotografi");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(960, 580);
         setMinimumSize(new Dimension(880, 540));
