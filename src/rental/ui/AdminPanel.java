@@ -813,3 +813,49 @@ public class AdminPanel extends JPanel {
 
     private JTable createStyledTable(DefaultTableModel model) {
         JTable table = new JTable(model);
+        table.setBackground(Theme.BG_CARD);
+        table.setForeground(Theme.TEXT_PRIMARY);
+        table.setGridColor(Theme.BORDER_SUBTLE);
+        table.setRowHeight(34);
+        table.setFont(Theme.FONT_BODY);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setSelectionBackground(Theme.ACCENT_LIME_SOFT);
+        table.setSelectionForeground(Theme.TEXT_PRIMARY);
+        table.getTableHeader().setBackground(Theme.BG_CARD_ALT);
+        table.getTableHeader().setForeground(Theme.TEXT_PRIMARY);
+        table.getTableHeader().setFont(Theme.FONT_SMALL_BOLD);
+
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object val, boolean isSelected,
+                                                           boolean hasFocus, int row, int col) {
+                super.getTableCellRendererComponent(tbl, val, isSelected, hasFocus, row, col);
+                setBackground(isSelected ? Theme.ACCENT_LIME_SOFT
+                        : (row % 2 == 0 ? Theme.BG_CARD : Theme.BG_CARD_ALT));
+                setForeground(Theme.TEXT_PRIMARY);
+                setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+                return this;
+            }
+        });
+        return table;
+    }
+
+    private Transaksi cariTransaksi(String id) {
+        for (Transaksi t : dataStore.getDaftarTransaksi()) {
+            if (t.getId().equalsIgnoreCase(id)) return t;
+        }
+        return null;
+    }
+
+    private double parsePositiveDouble(String raw, String fieldName) throws InputTidakValidException {
+        try {
+            double val = Double.parseDouble(raw.trim());
+            if (val <= 0) {
+                throw new InputTidakValidException(fieldName + " harus bernilai lebih dari 0.");
+            }
+            return val;
+        } catch (NumberFormatException e) {
+            throw new InputTidakValidException(fieldName + " harus berupa angka yang valid.");
+        }
+    }
+}
