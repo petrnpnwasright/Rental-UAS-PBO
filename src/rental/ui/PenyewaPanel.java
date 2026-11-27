@@ -875,3 +875,47 @@ public class PenyewaPanel extends JPanel {
                     "Gagal Membuat Transaksi", JOptionPane.WARNING_MESSAGE);
         }
     }
+
+    private void refreshRecentActivity() {
+        if (recentActivityList == null) return;
+        recentActivityList.removeAll();
+        ArrayList<Transaksi> list = penyewa.getRiwayat();
+        if (list.isEmpty()) {
+            JLabel empty = new JLabel("Belum ada transaksi.");
+            empty.setFont(Theme.FONT_SMALL);
+            empty.setForeground(Theme.TEXT_MUTED);
+            recentActivityList.add(empty);
+        } else {
+            int start = Math.max(0, list.size() - 3);
+            for (int i = list.size() - 1; i >= start; i--) {
+                Transaksi t = list.get(i);
+                RoundedPanel item = new RoundedPanel(new BorderLayout(8, 0), 14, Theme.BG_CARD_ALT, null);
+                item.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+                item.setMaximumSize(new Dimension(320, 48));
+
+                JPanel left = new JPanel();
+                left.setOpaque(false);
+                left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+                JLabel lId = new JLabel(t.getId() + " (" + t.getBarang().size() + " unit • " + t.getLamaSewa() + " hari)");
+                lId.setFont(Theme.FONT_SMALL_BOLD);
+                lId.setForeground(Theme.TEXT_PRIMARY);
+                JLabel lSt = new JLabel("Status: " + t.getStatus());
+                lSt.setFont(new Font("SansSerif", Font.PLAIN, 10));
+                lSt.setForeground(getStatusColor(t.getStatus()));
+                left.add(lId);
+                left.add(lSt);
+
+                double amt = (t.getInvoice() != null) ? t.getInvoice().getTotal() : t.hitungTotalSewa();
+                JLabel lAmt = new JLabel(Theme.formatRupiah(amt));
+                lAmt.setFont(Theme.FONT_SMALL_BOLD);
+                lAmt.setForeground(Theme.EMERALD);
+
+                item.add(left, BorderLayout.CENTER);
+                item.add(lAmt, BorderLayout.EAST);
+                recentActivityList.add(item);
+                recentActivityList.add(Box.createVerticalStrut(6));
+            }
+        }
+        recentActivityList.revalidate();
+        recentActivityList.repaint();
+    }
