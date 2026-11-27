@@ -198,3 +198,74 @@ public class LoginFrame extends JFrame {
 
         JPanel quickFillPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         quickFillPanel.setOpaque(false);
+        
+        RoundedButton btnDemoPenyewa = new RoundedButton(
+                "Akun Demo Penyewa", Theme.BG_CARD_ALT, new Color(232, 237, 232), Theme.TEXT_PRIMARY, 14);
+        btnDemoPenyewa.setBorderColor(Theme.BORDER_SUBTLE);
+        btnDemoPenyewa.setPreferredSize(new Dimension(130, 36));
+        btnDemoPenyewa.addActionListener(e -> {
+            txtUsername.setText("penyewa");
+            txtPassword.setText("penyewa123");
+            lblError.setText(" ");
+        });
+
+        RoundedButton btnDemoAdmin = new RoundedButton(
+                "Akun Demo Admin", Theme.BG_CARD_ALT, new Color(232, 237, 232), Theme.EMERALD, 14);
+        btnDemoAdmin.setBorderColor(Theme.BORDER_SUBTLE);
+        btnDemoAdmin.setPreferredSize(new Dimension(130, 36));
+        btnDemoAdmin.addActionListener(e -> {
+            txtUsername.setText("admin");
+            txtPassword.setText("admin123");
+            lblError.setText(" ");
+        });
+
+        quickFillPanel.add(btnDemoPenyewa);
+        quickFillPanel.add(btnDemoAdmin);
+
+        JLabel lblHint = new JLabel("Klik tombol di atas untuk mengisi kredensial demo secara otomatis", SwingConstants.CENTER);
+        lblHint.setFont(Theme.FONT_SMALL);
+        lblHint.setForeground(Theme.TEXT_MUTED);
+
+        int row = 0;
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        card.add(lblWelcome, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 22, 0);
+        card.add(lblSub, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        card.add(lblUser, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 14, 0);
+        card.add(txtUsername, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 6, 0);
+        card.add(lblPass, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 8, 0);
+        card.add(txtPassword, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 12, 0);
+        card.add(lblError, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 18, 0);
+        card.add(btnLogin, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 8, 0);
+        card.add(quickFillPanel, gbc);
+
+        gbc.gridy = row++;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        card.add(lblHint, gbc);
+
+        return card;
+    }
