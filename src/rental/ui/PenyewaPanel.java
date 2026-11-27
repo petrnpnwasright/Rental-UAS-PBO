@@ -706,3 +706,92 @@ public class PenyewaPanel extends JPanel {
         durRow.add(lblDur, BorderLayout.WEST);
         durRow.add(spnLamaSewa, BorderLayout.EAST);
 
+        JPanel payRow = new JPanel(new BorderLayout(8, 0));
+        payRow.setOpaque(false);
+        JLabel lblPay = new JLabel("Pembayaran:");
+        lblPay.setFont(Theme.FONT_SMALL_BOLD);
+        lblPay.setForeground(Theme.TEXT_SECONDARY);
+        cmbPembayaran = new JComboBox<>(new Pembayaran[]{
+                new TransferBank(), new QRIS(), new Tunai()
+        });
+        cmbPembayaran.setBackground(Theme.BG_INPUT);
+        cmbPembayaran.setForeground(Theme.TEXT_PRIMARY);
+        cmbPembayaran.setFont(Theme.FONT_SMALL_BOLD);
+        cmbPembayaran.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                setBackground(isSelected ? Theme.ACCENT_LIME : Theme.BG_INPUT);
+                setForeground(Theme.TEXT_PRIMARY);
+                return this;
+            }
+        });
+        payRow.add(lblPay, BorderLayout.WEST);
+        payRow.add(cmbPembayaran, BorderLayout.EAST);
+
+        // Dua tombol sejajar seperti Deposit (Lime) & Transfer (White) pada gambar
+        JPanel actionBtns = new JPanel(new GridLayout(1, 2, 10, 0));
+        actionBtns.setOpaque(false);
+
+        RoundedButton btnCheckout = new RoundedButton(
+                "Sewa Sekarang", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 18);
+        btnCheckout.setPreferredSize(new Dimension(135, 38));
+        btnCheckout.addActionListener(e -> prosesCheckout());
+
+        RoundedButton btnClear = new RoundedButton(
+                "Kosongkan", Theme.BG_CARD, Theme.BG_CARD_ALT, Theme.TEXT_PRIMARY, 18);
+        btnClear.setBorderColor(Theme.BORDER_SUBTLE);
+        btnClear.setPreferredSize(new Dimension(120, 38));
+        btnClear.addActionListener(e -> {
+            penyewa.getKeranjang().kosongkan();
+            refreshCartPanel();
+        });
+
+        actionBtns.add(btnCheckout);
+        actionBtns.add(btnClear);
+
+        controls.add(durRow);
+        controls.add(Box.createVerticalStrut(8));
+        controls.add(payRow);
+        controls.add(Box.createVerticalStrut(12));
+        controls.add(actionBtns);
+
+        JPanel topWalletStack = new JPanel(new BorderLayout(0, 10));
+        topWalletStack.setOpaque(false);
+        topWalletStack.add(walletHeader, BorderLayout.NORTH);
+        topWalletStack.add(passCard, BorderLayout.CENTER);
+
+        walletWrapper.add(topWalletStack, BorderLayout.NORTH);
+        walletWrapper.add(cartScroll, BorderLayout.CENTER);
+        walletWrapper.add(controls, BorderLayout.SOUTH);
+
+        RoundedPanel recentCard = new RoundedPanel(new BorderLayout(0, 10), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        recentCard.setBorder(BorderFactory.createEmptyBorder(14, 16, 14, 16));
+
+        JPanel recHeader = new JPanel(new BorderLayout());
+        recHeader.setOpaque(false);
+        JLabel lblRecTitle = new JLabel("Transaksi Terakhir");
+        lblRecTitle.setFont(Theme.FONT_H2);
+        lblRecTitle.setForeground(Theme.TEXT_PRIMARY);
+
+        RoundedButton btnViewAll = new RoundedButton(
+                "Semua Riwayat", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 14);
+        btnViewAll.setFont(Theme.FONT_SMALL_BOLD);
+        btnViewAll.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+        btnViewAll.addActionListener(e -> switchTab("RIWAYAT"));
+
+        recHeader.add(lblRecTitle, BorderLayout.WEST);
+        recHeader.add(btnViewAll, BorderLayout.EAST);
+
+        recentActivityList = new JPanel();
+        recentActivityList.setOpaque(false);
+        recentActivityList.setLayout(new BoxLayout(recentActivityList, BoxLayout.Y_AXIS));
+
+        recentCard.add(recHeader, BorderLayout.NORTH);
+        recentCard.add(recentActivityList, BorderLayout.CENTER);
+
+        right.add(walletWrapper, BorderLayout.CENTER);
+        right.add(recentCard, BorderLayout.SOUTH);
+        return right;
+    }
