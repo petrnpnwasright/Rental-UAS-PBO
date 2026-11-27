@@ -134,3 +134,67 @@ public class LoginFrame extends JFrame {
         p.add(l2);
         return p;
     }
+    
+    private JPanel buildRightLoginCard() {
+        RoundedPanel card = new RoundedPanel(new GridBagLayout(), 26, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        card.setBorder(BorderFactory.createEmptyBorder(30, 34, 30, 34));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+
+        JLabel lblWelcome = new JLabel("Selamat Datang Kembali");
+        lblWelcome.setFont(Theme.FONT_HERO);
+        lblWelcome.setForeground(Theme.TEXT_PRIMARY);
+
+        JLabel lblSub = new JLabel("Masuk menggunakan akun Penyewa atau Admin untuk melanjutkan.");
+        lblSub.setFont(Theme.FONT_BODY);
+        lblSub.setForeground(Theme.TEXT_SECONDARY);
+
+        JLabel lblUser = new JLabel("Username");
+        lblUser.setFont(Theme.FONT_BODY_BOLD);
+        lblUser.setForeground(Theme.TEXT_PRIMARY);
+
+        txtUsername = new RoundedTextField(20, 14);
+        txtUsername.setPreferredSize(new Dimension(280, 42));
+
+        JLabel lblPass = new JLabel("Password");
+        lblPass.setFont(Theme.FONT_BODY_BOLD);
+        lblPass.setForeground(Theme.TEXT_PRIMARY);
+
+        txtPassword = new JPasswordField(20) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Theme.BG_INPUT);
+                g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
+                g2.setColor(hasFocus() ? Theme.EMERALD : Theme.BORDER_SUBTLE);
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        txtPassword.setOpaque(false);
+        txtPassword.setForeground(Theme.TEXT_PRIMARY);
+        txtPassword.setCaretColor(Theme.DARK_PILL);
+        txtPassword.setFont(Theme.FONT_BODY);
+        txtPassword.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        txtPassword.setPreferredSize(new Dimension(280, 42));
+        txtPassword.addActionListener(e -> prosesLogin());
+
+        lblError = new JLabel(" ");
+        lblError.setFont(Theme.FONT_SMALL_BOLD);
+        lblError.setForeground(Theme.CORAL_RED);
+
+        RoundedButton btnLogin = new RoundedButton(
+                "Masuk ke Sistem",
+                Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 18);
+        btnLogin.setPreferredSize(new Dimension(280, 44));
+        btnLogin.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btnLogin.addActionListener(e -> prosesLogin());
+
+        JPanel quickFillPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        quickFillPanel.setOpaque(false);
