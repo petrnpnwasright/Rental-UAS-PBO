@@ -206,3 +206,59 @@ public class MainDashboardFrame extends JFrame {
         });
         return btn;
     }
+    
+    private JPanel buildTopHeaderBar() {
+        JPanel top = new JPanel(new BorderLayout(16, 0));
+        top.setOpaque(false);
+        top.setPreferredSize(new Dimension(1100, 48));
+
+        // Kiri: Logo Monetra-style (Lime square + Bold Brand Name)
+        JPanel brandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
+        brandPanel.setOpaque(false);
+
+        // Logo
+        JPanel logo = ImageHelper.createLogoPanel("assets/logo.png", 36, 36, 12);
+
+        JLabel lblBrand = new JLabel("Rental Studio");
+        lblBrand.setFont(new Font("SansSerif", Font.BOLD, 17));
+        lblBrand.setForeground(Theme.TEXT_PRIMARY);
+
+        brandPanel.add(logo);
+        brandPanel.add(lblBrand);
+
+        // Tengah: Pill Navigation Bar (Dashboard | Katalog | Riwayat / Transaksi)
+        JPanel centerHolder = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 2));
+        centerHolder.setOpaque(false);
+
+        RoundedPanel navPillContainer = new RoundedPanel(new FlowLayout(FlowLayout.CENTER, 6, 4), 22,
+                Theme.BG_CARD, Theme.BORDER_SUBTLE);
+
+        if (akunAktif instanceof Admin) {
+            topNavPills = new RoundedButton[4];
+            topNavPills[0] = createTopPillButton("Dashboard", true, () -> selectNavigation(0, () -> adminPanel.switchTab("OVERVIEW")));
+            topNavPills[1] = createTopPillButton("Katalog Barang", false, () -> selectNavigation(1, () -> adminPanel.switchTab("BARANG")));
+            topNavPills[2] = createTopPillButton("Transaksi", false, () -> selectNavigation(2, () -> adminPanel.switchTab("TRANSAKSI")));
+            topNavPills[3] = createTopPillButton("Pengembalian", false, () -> selectNavigation(3, () -> adminPanel.switchTab("PENGEMBALIAN")));
+        } else {
+            topNavPills = new RoundedButton[2];
+            topNavPills[0] = createTopPillButton("Dashboard & Katalog", true, () -> selectNavigation(0, () -> penyewaPanel.switchTab("KATALOG")));
+            topNavPills[1] = createTopPillButton("Riwayat & Invoice", false, () -> selectNavigation(1, () -> penyewaPanel.switchTab("RIWAYAT")));
+        }
+        for (RoundedButton pill : topNavPills) {
+            navPillContainer.add(pill);
+        }
+        centerHolder.add(navPillContainer);
+
+        // Kanan: Status Unit + Profil Avatar
+        JPanel rightGroup = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 4));
+        rightGroup.setOpaque(false);
+
+        lblHeaderStatus = new JLabel(" 0/0 Unit Tersedia ");
+        lblHeaderStatus.setFont(Theme.FONT_SMALL_BOLD);
+        lblHeaderStatus.setForeground(Theme.EMERALD);
+        lblHeaderStatus.setOpaque(true);
+        lblHeaderStatus.setBackground(Theme.EMERALD_BG);
+        lblHeaderStatus.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+
+        RoundedPanel profilePill = new RoundedPanel(new FlowLayout(FlowLayout.LEFT, 8, 3), 22,
+                Theme.BG_CARD, Theme.BORDER_SUBTLE);
