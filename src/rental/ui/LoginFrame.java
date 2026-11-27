@@ -59,3 +59,78 @@ public class LoginFrame extends JFrame {
 
         add(wrapper, BorderLayout.CENTER);
     }
+    
+    private JPanel buildLeftShowcaseCard() {
+        JPanel card = ImageHelper.createBackgroundImagePanel(
+                new BorderLayout(0, 16), "assets/login_banner.png", 26);
+        card.setBorder(BorderFactory.createEmptyBorder(28, 28, 28, 28));
+
+        JPanel topBrand = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        topBrand.setOpaque(false);
+
+        JPanel logoBadge = ImageHelper.createLogoPanel("assets/logo.png", 38, 38, 12);
+
+        JLabel lblBrand = new JLabel("Rental Studio");
+        lblBrand.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lblBrand.setForeground(Color.WHITE);
+        topBrand.add(logoBadge);
+        topBrand.add(lblBrand);
+
+        JPanel centerBox = new JPanel();
+        centerBox.setOpaque(false);
+        centerBox.setLayout(new BoxLayout(centerBox, BoxLayout.Y_AXIS));
+
+        JLabel lblTag = new JLabel("  iPHONE & PHOTOGRAPHY GEAR RENTAL  ");
+        lblTag.setFont(Theme.FONT_SMALL_BOLD);
+        lblTag.setForeground(Theme.DARK_PILL);
+        lblTag.setOpaque(true);
+        lblTag.setBackground(Theme.ACCENT_LIME);
+        lblTag.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+
+        JLabel lblTitle = new JLabel("<html>Sewa Flagship iPhone<br>&amp; Kamera Profesional<br>Dalam Hitungan Detik.</html>");
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 27));
+        lblTitle.setForeground(Color.WHITE);
+
+        JLabel lblDesc = new JLabel("<html>Katalog lengkap iPhone Pro Max, Kamera Mirrorless Full-Frame,<br>"
+                + "Gimbal, Lensa G-Master, hingga Lighting Studio dengan perhitungan<br>"
+                + "tarif transparan dan invoice otomatis.</html>");
+        lblDesc.setFont(Theme.FONT_BODY);
+        lblDesc.setForeground(new Color(230, 238, 232));
+
+        centerBox.add(Box.createVerticalStrut(12));
+        centerBox.add(lblTag);
+        centerBox.add(Box.createVerticalStrut(16));
+        centerBox.add(lblTitle);
+        centerBox.add(Box.createVerticalStrut(14));
+        centerBox.add(lblDesc);
+        centerBox.add(Box.createVerticalGlue());
+
+        RoundedPanel statsCard = new RoundedPanel(new GridLayout(1, 3, 10, 0), 18,
+                new Color(15, 20, 16, 175), new Color(158, 240, 26, 90));
+        statsCard.setBorder(BorderFactory.createEmptyBorder(14, 16, 14, 16));
+
+        statsCard.add(createMiniStat("3 Kategori", "iPhone, Kamera, Gear"));
+        statsCard.add(createMiniStat("3 Pembayaran", "Transfer, QRIS, Tunai"));
+        statsCard.add(createMiniStat("Auto Invoice", "Real-Time & Denda"));
+
+        card.add(topBrand, BorderLayout.NORTH);
+        card.add(centerBox, BorderLayout.CENTER);
+        card.add(statsCard, BorderLayout.SOUTH);
+        return card;
+    }
+
+    private JPanel createMiniStat(String title, String sub) {
+        JPanel p = new JPanel();
+        p.setOpaque(false);
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        JLabel l1 = new JLabel(title);
+        l1.setFont(Theme.FONT_BODY_BOLD);
+        l1.setForeground(Theme.ACCENT_LIME);
+        JLabel l2 = new JLabel(sub);
+        l2.setFont(Theme.FONT_SMALL);
+        l2.setForeground(new Color(215, 225, 217));
+        p.add(l1);
+        p.add(Box.createVerticalStrut(3));
+        p.add(l2);
+        return p;
+    }
