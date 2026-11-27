@@ -198,7 +198,7 @@ public class LoginFrame extends JFrame {
 
         JPanel quickFillPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         quickFillPanel.setOpaque(false);
-        
+
         RoundedButton btnDemoPenyewa = new RoundedButton(
                 "Akun Demo Penyewa", Theme.BG_CARD_ALT, new Color(232, 237, 232), Theme.TEXT_PRIMARY, 14);
         btnDemoPenyewa.setBorderColor(Theme.BORDER_SUBTLE);
@@ -269,3 +269,34 @@ public class LoginFrame extends JFrame {
 
         return card;
     }
+    
+    private void prosesLogin() {
+        try {
+            String user = txtUsername.getText().trim();
+            String pass = new String(txtPassword.getPassword());
+
+            if (user.isEmpty() || pass.isEmpty()) {
+                throw new AuthException("Username dan password wajib diisi.");
+            }
+
+            Akun ditemukan = null;
+            for (Akun a : dataStore.getDaftarAkun()) {
+                if (a.login(user, pass)) {
+                    ditemukan = a;
+                    break;
+                }
+            }
+
+            if (ditemukan == null) {
+                throw new AuthException("Username atau password salah. Silakan periksa kembali.");
+            }
+
+            Main.setAkunAktif(ditemukan);
+            MainDashboardFrame dashboard = new MainDashboardFrame(dataStore, ditemukan);
+            dashboard.setVisible(true);
+            dispose();
+        } catch (AuthException ex) {
+            lblError.setText(ex.getMessage());
+        }
+    }
+}
