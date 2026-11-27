@@ -637,3 +637,61 @@ public class AdminPanel extends JPanel {
         btnReturn.addActionListener(e -> {
             try {
                 int row = table.getSelectedRow();
+                if (row < 0) {
+                    throw new InputTidakValidException("Pilih transaksi berstatus DISEWA pada tabel terlebih dahulu.");
+                }
+                String idTrx = (String) model.getValueAt(row, 0);
+                Transaksi target = cariTransaksi(idTrx);
+                int simTelat = (Integer) spnHariTelat.getValue();
+
+                LocalDate tglKembali = (simTelat > 0)
+                        ? target.getTanggalJatuhTempo().plusDays(simTelat)
+                        : LocalDate.now();
+
+                admin.konfirmasiKembali(target, tglKembali);
+                if (target.getInvoice() != null) {
+                    target.getInvoice().cetakInvoice();
+                }
+                dataStore.saveAll();
+                refreshAll();
+
+                double denda = target.getInvoice().getDenda();
+                double totalAkhir = target.getInvoice().getTotal();
+                JOptionPane.showMessageDialog(this,
+                        "Pengembalian Transaksi " + idTrx + " BERHASIL!\n"
+                        + "Tanggal Kembali: " + tglKembali + "\n"
+                        + "Denda Keterlambatan: " + Theme.formatRupiah(denda) + "\n"
+                        + "Total Tagihan Akhir: " + Theme.formatRupiah(totalAkhir) + "\n"
+                        + "Seluruh unit kini kembali berstatus TERSEDIA.",
+                        "Pengembalian Dikonfirmasi", JOptionPane.INFORMATION_MESSAGE);
+            } catch (InputTidakValidException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Gagal Mengonfirmasi", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        footer.add(lblSim);
+        footer.add(spnHariTelat);
+        footer.add(btnReturn);
+
+        tableCard.add(sp, BorderLayout.CENTER);
+        tableCard.add(footer, BorderLayout.SOUTH);
+
+        view.add(header, BorderLayout.NORTH);
+        view.add(tableCard, BorderLayout.CENTER);
+        return view;
+    }
+
+    private JPanel buildRightAdminPanel() {
+        JPanel right = new JPanel(new BorderLayout(0, 14));
+        right.setOpaque(false);
+
+        RoundedPanel topCard = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        topCard.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JLabel lblTitle = new JLabel("Studio Control Card");
+        lblTitle.setFont(Theme.FONT_H2);
+        lblTitle.setForeground(Theme.TEXT_PRIMARY);
+
+        GradientCardPanel studioCard = new GradientCardPanel(
+                new BorderLayout(0, 10), 20,
