@@ -577,3 +577,63 @@ public class AdminPanel extends JPanel {
         JLabel l1 = new JLabel("Konfirmasi Pengembalian & Perhitungan Denda");
         l1.setFont(Theme.FONT_H1);
         l1.setForeground(Theme.TEXT_PRIMARY);
+        JLabel l2 = new JLabel("Denda keterlambatan dihitung Rp 50.000/hari. Gunakan simulasi hari telat untuk demo presentasi.");
+        l2.setFont(Theme.FONT_BODY);
+        l2.setForeground(Theme.TEXT_SECONDARY);
+        tBox.add(l1);
+        tBox.add(Box.createVerticalStrut(4));
+        tBox.add(l2);
+        header.add(tBox, BorderLayout.CENTER);
+
+        String[] cols = {"ID Trx", "Penyewa", "Barang Disewa", "Tgl Sewa", "Jatuh Tempo", "Subtotal", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        for (Transaksi t : dataStore.getDaftarTransaksi()) {
+            if ("DISEWA".equals(t.getStatus()) || "SELESAI".equals(t.getStatus())) {
+                StringBuilder items = new StringBuilder();
+                for (int j = 0; j < t.getBarang().size(); j++) {
+                    if (j > 0) items.append(", ");
+                    items.append(t.getBarang().get(j).getNama());
+                }
+                model.addRow(new Object[]{
+                        t.getId(),
+                        t.getPenyewa().getNamaLengkap(),
+                        items.toString(),
+                        t.getTanggalSewa(),
+                        t.getTanggalJatuhTempo(),
+                        Theme.formatRupiah(t.hitungTotalSewa()),
+                        t.getStatus()
+                });
+            }
+        }
+
+        JTable table = createStyledTable(model);
+
+        RoundedPanel tableCard = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        tableCard.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+        JScrollPane sp = new JScrollPane(table);
+        sp.getViewport().setBackground(Theme.BG_CARD);
+        sp.setBorder(null);
+
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        footer.setOpaque(false);
+
+        JLabel lblSim = new JLabel("Simulasi Keterlambatan (Hari Telat dari Jatuh Tempo):");
+        lblSim.setFont(Theme.FONT_SMALL_BOLD);
+        lblSim.setForeground(Theme.TEXT_SECONDARY);
+
+        JSpinner spnHariTelat = new JSpinner(new SpinnerNumberModel(0, 0, 30, 1));
+        spnHariTelat.setPreferredSize(new Dimension(65, 32));
+
+        RoundedButton btnReturn = new RoundedButton(
+                "Konfirmasi Pengembalian Barang",
+                Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnReturn.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        btnReturn.addActionListener(e -> {
+            try {
+                int row = table.getSelectedRow();
