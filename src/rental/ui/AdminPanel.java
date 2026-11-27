@@ -480,3 +480,382 @@ public class AdminPanel extends JPanel {
         JLabel l1 = new JLabel("Persetujuan Transaksi Sewa");
         l1.setFont(Theme.FONT_H1);
         l1.setForeground(Theme.TEXT_PRIMARY);
+        JLabel l2 = new JLabel("Pilih transaksi berstatus MENUNGGU_KONFIRMASI lalu klik Terima Transaksi untuk mengunci stok & menerbitkan Invoice.");
+        l2.setFont(Theme.FONT_BODY);
+        l2.setForeground(Theme.TEXT_SECONDARY);
+        tBox.add(l1);
+        tBox.add(Box.createVerticalStrut(4));
+        tBox.add(l2);
+        header.add(tBox, BorderLayout.CENTER);
+
+        String[] cols = {"ID Trx", "Penyewa", "Daftar Barang", "Durasi", "Metode Bayar", "Total Biaya", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        List<Transaksi> allTrx = dataStore.getDaftarTransaksi();
+        for (int i = allTrx.size() - 1; i >= 0; i--) {
+            Transaksi t = allTrx.get(i);
+            StringBuilder items = new StringBuilder();
+            for (int j = 0; j < t.getBarang().size(); j++) {
+                if (j > 0) items.append(", ");
+                items.append(t.getBarang().get(j).getNama());
+            }
+            model.addRow(new Object[]{
+                    t.getId(),
+                    t.getPenyewa().getNamaLengkap() + " (@" + t.getPenyewa().getUsername() + ")",
+                    items.toString(),
+                    t.getLamaSewa() + " hari",
+                    t.getPembayaran().getNamaMetode(),
+                    Theme.formatRupiah(t.hitungTotalSewa()),
+                    t.getStatus()
+            });
+        }
+
+        JTable table = createStyledTable(model);
+
+        RoundedPanel tableCard = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        tableCard.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+        JScrollPane sp = new JScrollPane(table);
+        sp.getViewport().setBackground(Theme.BG_CARD);
+        sp.setBorder(null);
+
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        footer.setOpaque(false);
+
+        RoundedButton btnTerima = new RoundedButton(
+                "Terima Transaksi & Terbitkan Invoice",
+                Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnTerima.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        btnTerima.addActionListener(e -> {
+            try {
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    throw new InputTidakValidException("Silakan pilih baris transaksi pada tabel terlebih dahulu.");
+                }
+                String idTrx = (String) model.getValueAt(row, 0);
+                Transaksi target = cariTransaksi(idTrx);
+                admin.terimaTransaksi(target);
+                if (target.getInvoice() != null) {
+                    target.getInvoice().cetakInvoice();
+                }
+                dataStore.saveAll();
+                refreshAll();
+                JOptionPane.showMessageDialog(this,
+                        "Transaksi " + idTrx + " DITERIMA!\n"
+                        + "Status barang berubah menjadi SEDANG DISEWA dan Invoice "
+                        + target.getInvoice().getIdInvoice() + " telah tercetak.",
+                        "Transaksi Disetujui", JOptionPane.INFORMATION_MESSAGE);
+            } catch (BarangTidakTersediaException | InputTidakValidException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Tidak Dapat Memproses Transaksi", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        footer.add(btnTerima);
+        tableCard.add(sp, BorderLayout.CENTER);
+        tableCard.add(footer, BorderLayout.SOUTH);
+
+        view.add(header, BorderLayout.NORTH);
+        view.add(tableCard, BorderLayout.CENTER);
+        return view;
+    }
+
+    private JPanel buildPengembalianView() {
+        JPanel view = new JPanel(new BorderLayout(0, 14));
+        view.setOpaque(false);
+
+        RoundedPanel header = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        header.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
+
+        JPanel tBox = new JPanel();
+        tBox.setOpaque(false);
+        tBox.setLayout(new BoxLayout(tBox, BoxLayout.Y_AXIS));
+        JLabel l1 = new JLabel("Konfirmasi Pengembalian & Perhitungan Denda");
+        l1.setFont(Theme.FONT_H1);
+        l1.setForeground(Theme.TEXT_PRIMARY);
+        JLabel l2 = new JLabel("Denda keterlambatan dihitung Rp 50.000/hari. Gunakan simulasi hari telat untuk demo presentasi.");
+        l2.setFont(Theme.FONT_BODY);
+        l2.setForeground(Theme.TEXT_SECONDARY);
+        tBox.add(l1);
+        tBox.add(Box.createVerticalStrut(4));
+        tBox.add(l2);
+        header.add(tBox, BorderLayout.CENTER);
+
+        String[] cols = {"ID Trx", "Penyewa", "Barang Disewa", "Tgl Sewa", "Jatuh Tempo", "Subtotal", "Status"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        for (Transaksi t : dataStore.getDaftarTransaksi()) {
+            if ("DISEWA".equals(t.getStatus()) || "SELESAI".equals(t.getStatus())) {
+                StringBuilder items = new StringBuilder();
+                for (int j = 0; j < t.getBarang().size(); j++) {
+                    if (j > 0) items.append(", ");
+                    items.append(t.getBarang().get(j).getNama());
+                }
+                model.addRow(new Object[]{
+                        t.getId(),
+                        t.getPenyewa().getNamaLengkap(),
+                        items.toString(),
+                        t.getTanggalSewa(),
+                        t.getTanggalJatuhTempo(),
+                        Theme.formatRupiah(t.hitungTotalSewa()),
+                        t.getStatus()
+                });
+            }
+        }
+
+        JTable table = createStyledTable(model);
+
+        RoundedPanel tableCard = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        tableCard.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+        JScrollPane sp = new JScrollPane(table);
+        sp.getViewport().setBackground(Theme.BG_CARD);
+        sp.setBorder(null);
+
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        footer.setOpaque(false);
+
+        JLabel lblSim = new JLabel("Simulasi Keterlambatan (Hari Telat dari Jatuh Tempo):");
+        lblSim.setFont(Theme.FONT_SMALL_BOLD);
+        lblSim.setForeground(Theme.TEXT_SECONDARY);
+
+        JSpinner spnHariTelat = new JSpinner(new SpinnerNumberModel(0, 0, 30, 1));
+        spnHariTelat.setPreferredSize(new Dimension(65, 32));
+
+        RoundedButton btnReturn = new RoundedButton(
+                "Konfirmasi Pengembalian Barang",
+                Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnReturn.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        btnReturn.addActionListener(e -> {
+            try {
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    throw new InputTidakValidException("Pilih transaksi berstatus DISEWA pada tabel terlebih dahulu.");
+                }
+                String idTrx = (String) model.getValueAt(row, 0);
+                Transaksi target = cariTransaksi(idTrx);
+                int simTelat = (Integer) spnHariTelat.getValue();
+
+                LocalDate tglKembali = (simTelat > 0)
+                        ? target.getTanggalJatuhTempo().plusDays(simTelat)
+                        : LocalDate.now();
+
+                admin.konfirmasiKembali(target, tglKembali);
+                if (target.getInvoice() != null) {
+                    target.getInvoice().cetakInvoice();
+                }
+                dataStore.saveAll();
+                refreshAll();
+
+                double denda = target.getInvoice().getDenda();
+                double totalAkhir = target.getInvoice().getTotal();
+                JOptionPane.showMessageDialog(this,
+                        "Pengembalian Transaksi " + idTrx + " BERHASIL!\n"
+                        + "Tanggal Kembali: " + tglKembali + "\n"
+                        + "Denda Keterlambatan: " + Theme.formatRupiah(denda) + "\n"
+                        + "Total Tagihan Akhir: " + Theme.formatRupiah(totalAkhir) + "\n"
+                        + "Seluruh unit kini kembali berstatus TERSEDIA.",
+                        "Pengembalian Dikonfirmasi", JOptionPane.INFORMATION_MESSAGE);
+            } catch (InputTidakValidException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(),
+                        "Gagal Mengonfirmasi", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        footer.add(lblSim);
+        footer.add(spnHariTelat);
+        footer.add(btnReturn);
+
+        tableCard.add(sp, BorderLayout.CENTER);
+        tableCard.add(footer, BorderLayout.SOUTH);
+
+        view.add(header, BorderLayout.NORTH);
+        view.add(tableCard, BorderLayout.CENTER);
+        return view;
+    }
+
+    private JPanel buildRightAdminPanel() {
+        JPanel right = new JPanel(new BorderLayout(0, 14));
+        right.setOpaque(false);
+
+        RoundedPanel topCard = new RoundedPanel(new BorderLayout(0, 12), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        topCard.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JLabel lblTitle = new JLabel("Studio Control Card");
+        lblTitle.setFont(Theme.FONT_H2);
+        lblTitle.setForeground(Theme.TEXT_PRIMARY);
+
+        GradientCardPanel studioCard = new GradientCardPanel(
+                new BorderLayout(0, 10), 20,
+                Theme.GRADIENT_CARD_TOP, Theme.GRADIENT_CARD_BOT);
+        studioCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+
+        JLabel lblBadge = new JLabel("ADMIN ACCESS • ACTIVE");
+        lblBadge.setFont(Theme.FONT_SMALL_BOLD);
+        lblBadge.setForeground(Theme.ACCENT_LIME);
+
+        long menunggu = dataStore.getDaftarTransaksi().stream()
+                .filter(t -> "MENUNGGU_KONFIRMASI".equals(t.getStatus())).count();
+        long disewa = dataStore.getDaftarTransaksi().stream()
+                .filter(t -> "DISEWA".equals(t.getStatus())).count();
+
+        JPanel statsMid = new JPanel();
+        statsMid.setOpaque(false);
+        statsMid.setLayout(new BoxLayout(statsMid, BoxLayout.Y_AXIS));
+        JLabel lBig = new JLabel(menunggu + " Menunggu • " + disewa + " Aktif");
+        lBig.setFont(new Font("SansSerif", Font.BOLD, 17));
+        lBig.setForeground(Color.WHITE);
+        JLabel lSub = new JLabel("Denda Keterlambatan: Rp 50.000 / hari");
+        lSub.setFont(Theme.FONT_SMALL);
+        lSub.setForeground(new Color(195, 208, 198));
+        statsMid.add(lBig);
+        statsMid.add(Box.createVerticalStrut(4));
+        statsMid.add(lSub);
+
+        studioCard.add(lblBadge, BorderLayout.NORTH);
+        studioCard.add(statsMid, BorderLayout.SOUTH);
+
+        JPanel quickGrid = new JPanel(new GridLayout(1, 2, 10, 0));
+        quickGrid.setOpaque(false);
+        RoundedButton b1 = new RoundedButton(
+                "Persetujuan", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        b1.setPreferredSize(new Dimension(120, 36));
+        b1.addActionListener(e -> switchTab("TRANSAKSI"));
+
+        RoundedButton b2 = new RoundedButton(
+                "Pengembalian", Theme.BG_CARD, Theme.BG_CARD_ALT, Theme.TEXT_PRIMARY, 16);
+        b2.setBorderColor(Theme.BORDER_SUBTLE);
+        b2.setPreferredSize(new Dimension(120, 36));
+        b2.addActionListener(e -> switchTab("PENGEMBALIAN"));
+
+        quickGrid.add(b1);
+        quickGrid.add(b2);
+
+        topCard.add(lblTitle, BorderLayout.NORTH);
+        topCard.add(studioCard, BorderLayout.CENTER);
+        topCard.add(quickGrid, BorderLayout.SOUTH);
+
+        RoundedPanel feedCard = new RoundedPanel(new BorderLayout(0, 10), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        feedCard.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JLabel lblFeed = new JLabel("Aktivitas Transaksi Terbaru");
+        lblFeed.setFont(Theme.FONT_H2);
+        lblFeed.setForeground(Theme.TEXT_PRIMARY);
+
+        JPanel list = new JPanel();
+        list.setOpaque(false);
+        list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
+
+        List<Transaksi> all = dataStore.getDaftarTransaksi();
+        if (all.isEmpty()) {
+            JLabel empty = new JLabel("Belum ada transaksi masuk.");
+            empty.setFont(Theme.FONT_SMALL);
+            empty.setForeground(Theme.TEXT_MUTED);
+            list.add(empty);
+        } else {
+            int start = Math.max(0, all.size() - 5);
+            for (int i = all.size() - 1; i >= start; i--) {
+                Transaksi t = all.get(i);
+                RoundedPanel row = new RoundedPanel(new BorderLayout(8, 0), 14, Theme.BG_CARD_ALT, null);
+                row.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+                row.setMaximumSize(new Dimension(320, 50));
+
+                JPanel left = new JPanel();
+                left.setOpaque(false);
+                left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+                JLabel lName = new JLabel(t.getId() + " • " + t.getPenyewa().getNamaLengkap());
+                lName.setFont(Theme.FONT_SMALL_BOLD);
+                lName.setForeground(Theme.TEXT_PRIMARY);
+                JLabel lItemSub = new JLabel(t.getStatus() + " (" + t.getLamaSewa() + " hari)");
+                lItemSub.setFont(new Font("SansSerif", Font.PLAIN, 10));
+                lItemSub.setForeground(Theme.TEXT_SECONDARY);
+                left.add(lName);
+                left.add(lItemSub);
+
+                double val = (t.getInvoice() != null) ? t.getInvoice().getTotal() : t.hitungTotalSewa();
+                JLabel lPrice = new JLabel(Theme.formatRupiah(val));
+                lPrice.setFont(Theme.FONT_SMALL_BOLD);
+                lPrice.setForeground(Theme.EMERALD);
+
+                row.add(left, BorderLayout.CENTER);
+                row.add(lPrice, BorderLayout.EAST);
+                list.add(row);
+                list.add(Box.createVerticalStrut(6));
+            }
+        }
+
+        feedCard.add(lblFeed, BorderLayout.NORTH);
+        feedCard.add(list, BorderLayout.CENTER);
+
+        right.add(topCard, BorderLayout.NORTH);
+        right.add(feedCard, BorderLayout.CENTER);
+        return right;
+    }
+
+    private JPanel wrapLabeledField(String label, Component field) {
+        JPanel p = new JPanel(new BorderLayout(0, 4));
+        p.setOpaque(false);
+        JLabel l = new JLabel(label);
+        l.setFont(Theme.FONT_SMALL_BOLD);
+        l.setForeground(Theme.TEXT_SECONDARY);
+        p.add(l, BorderLayout.NORTH);
+        p.add(field, BorderLayout.CENTER);
+        return p;
+    }
+
+    private JTable createStyledTable(DefaultTableModel model) {
+        JTable table = new JTable(model);
+        table.setBackground(Theme.BG_CARD);
+        table.setForeground(Theme.TEXT_PRIMARY);
+        table.setGridColor(Theme.BORDER_SUBTLE);
+        table.setRowHeight(34);
+        table.setFont(Theme.FONT_BODY);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setSelectionBackground(Theme.ACCENT_LIME_SOFT);
+        table.setSelectionForeground(Theme.TEXT_PRIMARY);
+        table.getTableHeader().setBackground(Theme.BG_CARD_ALT);
+        table.getTableHeader().setForeground(Theme.TEXT_PRIMARY);
+        table.getTableHeader().setFont(Theme.FONT_SMALL_BOLD);
+
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object val, boolean isSelected,
+                                                           boolean hasFocus, int row, int col) {
+                super.getTableCellRendererComponent(tbl, val, isSelected, hasFocus, row, col);
+                setBackground(isSelected ? Theme.ACCENT_LIME_SOFT
+                        : (row % 2 == 0 ? Theme.BG_CARD : Theme.BG_CARD_ALT));
+                setForeground(Theme.TEXT_PRIMARY);
+                setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+                return this;
+            }
+        });
+        return table;
+    }
+
+    private Transaksi cariTransaksi(String id) {
+        for (Transaksi t : dataStore.getDaftarTransaksi()) {
+            if (t.getId().equalsIgnoreCase(id)) return t;
+        }
+        return null;
+    }
+
+    private double parsePositiveDouble(String raw, String fieldName) throws InputTidakValidException {
+        try {
+            double val = Double.parseDouble(raw.trim());
+            if (val <= 0) {
+                throw new InputTidakValidException(fieldName + " harus bernilai lebih dari 0.");
+            }
+            return val;
+        } catch (NumberFormatException e) {
+            throw new InputTidakValidException(fieldName + " harus berupa angka yang valid.");
+        }
+    }
+}

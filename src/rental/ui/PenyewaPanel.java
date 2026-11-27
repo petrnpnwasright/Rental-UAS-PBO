@@ -706,3 +706,400 @@ public class PenyewaPanel extends JPanel {
         durRow.add(lblDur, BorderLayout.WEST);
         durRow.add(spnLamaSewa, BorderLayout.EAST);
 
+        JPanel payRow = new JPanel(new BorderLayout(8, 0));
+        payRow.setOpaque(false);
+        JLabel lblPay = new JLabel("Pembayaran:");
+        lblPay.setFont(Theme.FONT_SMALL_BOLD);
+        lblPay.setForeground(Theme.TEXT_SECONDARY);
+        cmbPembayaran = new JComboBox<>(new Pembayaran[]{
+                new TransferBank(), new QRIS(), new Tunai()
+        });
+        cmbPembayaran.setBackground(Theme.BG_INPUT);
+        cmbPembayaran.setForeground(Theme.TEXT_PRIMARY);
+        cmbPembayaran.setFont(Theme.FONT_SMALL_BOLD);
+        cmbPembayaran.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                setBackground(isSelected ? Theme.ACCENT_LIME : Theme.BG_INPUT);
+                setForeground(Theme.TEXT_PRIMARY);
+                return this;
+            }
+        });
+        payRow.add(lblPay, BorderLayout.WEST);
+        payRow.add(cmbPembayaran, BorderLayout.EAST);
+
+        // Dua tombol sejajar seperti Deposit (Lime) & Transfer (White) pada gambar
+        JPanel actionBtns = new JPanel(new GridLayout(1, 2, 10, 0));
+        actionBtns.setOpaque(false);
+
+        RoundedButton btnCheckout = new RoundedButton(
+                "Sewa Sekarang", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 18);
+        btnCheckout.setPreferredSize(new Dimension(135, 38));
+        btnCheckout.addActionListener(e -> prosesCheckout());
+
+        RoundedButton btnClear = new RoundedButton(
+                "Kosongkan", Theme.BG_CARD, Theme.BG_CARD_ALT, Theme.TEXT_PRIMARY, 18);
+        btnClear.setBorderColor(Theme.BORDER_SUBTLE);
+        btnClear.setPreferredSize(new Dimension(120, 38));
+        btnClear.addActionListener(e -> {
+            penyewa.getKeranjang().kosongkan();
+            refreshCartPanel();
+        });
+
+        actionBtns.add(btnCheckout);
+        actionBtns.add(btnClear);
+
+        controls.add(durRow);
+        controls.add(Box.createVerticalStrut(8));
+        controls.add(payRow);
+        controls.add(Box.createVerticalStrut(12));
+        controls.add(actionBtns);
+
+        JPanel topWalletStack = new JPanel(new BorderLayout(0, 10));
+        topWalletStack.setOpaque(false);
+        topWalletStack.add(walletHeader, BorderLayout.NORTH);
+        topWalletStack.add(passCard, BorderLayout.CENTER);
+
+        walletWrapper.add(topWalletStack, BorderLayout.NORTH);
+        walletWrapper.add(cartScroll, BorderLayout.CENTER);
+        walletWrapper.add(controls, BorderLayout.SOUTH);
+
+        RoundedPanel recentCard = new RoundedPanel(new BorderLayout(0, 10), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        recentCard.setBorder(BorderFactory.createEmptyBorder(14, 16, 14, 16));
+
+        JPanel recHeader = new JPanel(new BorderLayout());
+        recHeader.setOpaque(false);
+        JLabel lblRecTitle = new JLabel("Transaksi Terakhir");
+        lblRecTitle.setFont(Theme.FONT_H2);
+        lblRecTitle.setForeground(Theme.TEXT_PRIMARY);
+
+        RoundedButton btnViewAll = new RoundedButton(
+                "Semua Riwayat", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 14);
+        btnViewAll.setFont(Theme.FONT_SMALL_BOLD);
+        btnViewAll.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+        btnViewAll.addActionListener(e -> switchTab("RIWAYAT"));
+
+        recHeader.add(lblRecTitle, BorderLayout.WEST);
+        recHeader.add(btnViewAll, BorderLayout.EAST);
+
+        recentActivityList = new JPanel();
+        recentActivityList.setOpaque(false);
+        recentActivityList.setLayout(new BoxLayout(recentActivityList, BoxLayout.Y_AXIS));
+
+        recentCard.add(recHeader, BorderLayout.NORTH);
+        recentCard.add(recentActivityList, BorderLayout.CENTER);
+
+        right.add(walletWrapper, BorderLayout.CENTER);
+        right.add(recentCard, BorderLayout.SOUTH);
+        return right;
+    }
+
+    private void refreshCartPanel() {
+        if (cartItemsContainer == null) return;
+        cartItemsContainer.removeAll();
+        ArrayList<Barang> items = penyewa.getKeranjang().getBarang();
+        lblCartCount.setText(items.size() + " Item");
+
+        if (items.isEmpty()) {
+            JLabel empty = new JLabel("Keranjang kosong. Pilih barang di katalog.");
+            empty.setFont(Theme.FONT_SMALL);
+            empty.setForeground(Theme.TEXT_MUTED);
+            empty.setBorder(BorderFactory.createEmptyBorder(16, 4, 16, 4));
+            cartItemsContainer.add(empty);
+        } else {
+            for (Barang b : items) {
+                RoundedPanel row = new RoundedPanel(new BorderLayout(8, 0), 14, Theme.BG_CARD_ALT, null);
+                row.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+                row.setMaximumSize(new Dimension(320, 46));
+
+                JPanel info = new JPanel();
+                info.setOpaque(false);
+                info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
+                JLabel lName = new JLabel(b.getNama());
+                lName.setFont(Theme.FONT_SMALL_BOLD);
+                lName.setForeground(Theme.TEXT_PRIMARY);
+                JLabel lItemSub = new JLabel(Theme.formatRupiah(b.getTarifHarian()) + "/hari • " + b.getKategori());
+                lItemSub.setFont(new Font("SansSerif", Font.PLAIN, 10));
+                lItemSub.setForeground(Theme.TEXT_SECONDARY);
+                info.add(lName);
+                info.add(lItemSub);
+
+                RoundedButton btnDel = new RoundedButton(
+                        "x", Theme.CORAL_BG, Theme.CORAL_RED, Theme.CORAL_RED, 12);
+                btnDel.setFont(Theme.FONT_SMALL_BOLD);
+                btnDel.setPreferredSize(new Dimension(26, 26));
+                btnDel.addActionListener(e -> {
+                    penyewa.getKeranjang().hapusBarang(b.getId());
+                    refreshCartPanel();
+                });
+
+                row.add(info, BorderLayout.CENTER);
+                row.add(btnDel, BorderLayout.EAST);
+                cartItemsContainer.add(row);
+                cartItemsContainer.add(Box.createVerticalStrut(6));
+            }
+        }
+        updateEstimatedTotal();
+        cartItemsContainer.revalidate();
+        cartItemsContainer.repaint();
+    }
+
+    private void updateEstimatedTotal() {
+        if (spnLamaSewa == null || lblCartTotal == null) return;
+        int hari = (Integer) spnLamaSewa.getValue();
+        double est = penyewa.getKeranjang().hitungEstimasiTotal(hari);
+        lblCartTotal.setText(Theme.formatRupiah(est));
+    }
+
+    private void prosesCheckout() {
+        try {
+            int hari = (Integer) spnLamaSewa.getValue();
+            Pembayaran metode = (Pembayaran) cmbPembayaran.getSelectedItem();
+            String idTrx = dataStore.generateNextTransaksiId();
+
+            Transaksi trx = penyewa.buatTransaksi(idTrx, hari, metode);
+            dataStore.getDaftarTransaksi().add(trx);
+            dataStore.saveTransaksi();
+
+            refreshAll();
+            JOptionPane.showMessageDialog(this,
+                    "Transaksi " + trx.getId() + " berhasil dibuat!\n"
+                    + "Total Estimasi: " + Theme.formatRupiah(trx.hitungTotalSewa()) + "\n"
+                    + "Metode Pembayaran: " + metode.getNamaMetode() + "\n"
+                    + "Status: MENUNGGU KONFIRMASI ADMIN.",
+                    "Checkout Berhasil", JOptionPane.INFORMATION_MESSAGE);
+        } catch (InputTidakValidException | BarangTidakTersediaException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                    "Gagal Membuat Transaksi", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void refreshRecentActivity() {
+        if (recentActivityList == null) return;
+        recentActivityList.removeAll();
+        ArrayList<Transaksi> list = penyewa.getRiwayat();
+        if (list.isEmpty()) {
+            JLabel empty = new JLabel("Belum ada transaksi.");
+            empty.setFont(Theme.FONT_SMALL);
+            empty.setForeground(Theme.TEXT_MUTED);
+            recentActivityList.add(empty);
+        } else {
+            int start = Math.max(0, list.size() - 3);
+            for (int i = list.size() - 1; i >= start; i--) {
+                Transaksi t = list.get(i);
+                RoundedPanel item = new RoundedPanel(new BorderLayout(8, 0), 14, Theme.BG_CARD_ALT, null);
+                item.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+                item.setMaximumSize(new Dimension(320, 48));
+
+                JPanel left = new JPanel();
+                left.setOpaque(false);
+                left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+                JLabel lId = new JLabel(t.getId() + " (" + t.getBarang().size() + " unit • " + t.getLamaSewa() + " hari)");
+                lId.setFont(Theme.FONT_SMALL_BOLD);
+                lId.setForeground(Theme.TEXT_PRIMARY);
+                JLabel lSt = new JLabel("Status: " + t.getStatus());
+                lSt.setFont(new Font("SansSerif", Font.PLAIN, 10));
+                lSt.setForeground(getStatusColor(t.getStatus()));
+                left.add(lId);
+                left.add(lSt);
+
+                double amt = (t.getInvoice() != null) ? t.getInvoice().getTotal() : t.hitungTotalSewa();
+                JLabel lAmt = new JLabel(Theme.formatRupiah(amt));
+                lAmt.setFont(Theme.FONT_SMALL_BOLD);
+                lAmt.setForeground(Theme.EMERALD);
+
+                item.add(left, BorderLayout.CENTER);
+                item.add(lAmt, BorderLayout.EAST);
+                recentActivityList.add(item);
+                recentActivityList.add(Box.createVerticalStrut(6));
+            }
+        }
+        recentActivityList.revalidate();
+        recentActivityList.repaint();
+    }
+
+    private JPanel buildRiwayatView() {
+        JPanel wrapper = new JPanel(new BorderLayout(0, 14));
+        wrapper.setOpaque(false);
+
+        RoundedPanel header = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        header.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
+
+        JPanel titleBox = new JPanel();
+        titleBox.setOpaque(false);
+        titleBox.setLayout(new BoxLayout(titleBox, BoxLayout.Y_AXIS));
+        JLabel lblTitle = new JLabel("Riwayat Penyewaan & Invoice Resmi");
+        lblTitle.setFont(Theme.FONT_H1);
+        lblTitle.setForeground(Theme.TEXT_PRIMARY);
+        JLabel lblSub = new JLabel("Setelah transaksi diterima Admin, Anda dapat melihat dan mencetak Invoice (.txt).");
+        lblSub.setFont(Theme.FONT_BODY);
+        lblSub.setForeground(Theme.TEXT_SECONDARY);
+        titleBox.add(lblTitle);
+        titleBox.add(Box.createVerticalStrut(4));
+        titleBox.add(lblSub);
+
+        RoundedButton btnBack = new RoundedButton(
+                "Kembali ke Katalog", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnBack.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnBack.addActionListener(e -> switchTab("KATALOG"));
+
+        header.add(titleBox, BorderLayout.WEST);
+        header.add(btnBack, BorderLayout.EAST);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setOpaque(false);
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+
+        ArrayList<Transaksi> riwayat = penyewa.getRiwayat();
+        if (riwayat.isEmpty()) {
+            RoundedPanel emptyCard = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+            emptyCard.setBorder(BorderFactory.createEmptyBorder(40, 24, 40, 24));
+            JLabel lblEmpty = new JLabel("Belum ada riwayat penyewaan pada akun Anda.");
+            lblEmpty.setFont(Theme.FONT_H2);
+            lblEmpty.setForeground(Theme.TEXT_SECONDARY);
+            emptyCard.add(lblEmpty, BorderLayout.CENTER);
+            listPanel.add(emptyCard);
+        } else {
+            for (int i = riwayat.size() - 1; i >= 0; i--) {
+                Transaksi t = riwayat.get(i);
+                listPanel.add(buildTransaksiHistoryCard(t));
+                listPanel.add(Box.createVerticalStrut(12));
+            }
+        }
+
+        JScrollPane scroll = new JScrollPane(listPanel);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        wrapper.add(header, BorderLayout.NORTH);
+        wrapper.add(scroll, BorderLayout.CENTER);
+        return wrapper;
+    }
+
+    private JPanel buildTransaksiHistoryCard(Transaksi t) {
+        RoundedPanel card = new RoundedPanel(new BorderLayout(12, 8), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        card.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
+        card.setMaximumSize(new Dimension(1200, 155));
+
+        JPanel left = new JPanel();
+        left.setOpaque(false);
+        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+
+        JPanel topLine = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        topLine.setOpaque(false);
+        JLabel lblId = new JLabel(t.getId());
+        lblId.setFont(Theme.FONT_H2);
+        lblId.setForeground(Theme.TEXT_PRIMARY);
+
+        JLabel lblStatus = new JLabel(" " + t.getStatus() + " ");
+        lblStatus.setFont(Theme.FONT_SMALL_BOLD);
+        lblStatus.setForeground(getStatusColor(t.getStatus()));
+        lblStatus.setOpaque(true);
+        lblStatus.setBackground(Theme.BG_CARD_ALT);
+
+        topLine.add(lblId);
+        topLine.add(lblStatus);
+
+        StringBuilder itemNames = new StringBuilder();
+        for (int i = 0; i < t.getBarang().size(); i++) {
+            if (i > 0) itemNames.append(", ");
+            itemNames.append(t.getBarang().get(i).getNama());
+        }
+        JLabel lblItems = new JLabel("Perangkat: " + itemNames);
+        lblItems.setFont(Theme.FONT_BODY);
+        lblItems.setForeground(Theme.TEXT_SECONDARY);
+
+        JLabel lblDates = new JLabel("Sewa: " + t.getTanggalSewa()
+                + "  |  Jatuh Tempo: " + t.getTanggalJatuhTempo()
+                + "  |  Durasi: " + t.getLamaSewa() + " hari (" + t.getPembayaran().getNamaMetode() + ")");
+        lblDates.setFont(Theme.FONT_SMALL);
+        lblDates.setForeground(Theme.TEXT_MUTED);
+
+        left.add(topLine);
+        left.add(Box.createVerticalStrut(6));
+        left.add(lblItems);
+        left.add(Box.createVerticalStrut(4));
+        left.add(lblDates);
+
+        JPanel right = new JPanel();
+        right.setOpaque(false);
+        right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
+
+        double total = (t.getInvoice() != null) ? t.getInvoice().getTotal() : t.hitungTotalSewa();
+        JLabel lblTotal = new JLabel(Theme.formatRupiah(total));
+        lblTotal.setFont(Theme.FONT_H1);
+        lblTotal.setForeground(Theme.EMERALD);
+        lblTotal.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+        boolean approved = ("DISEWA".equals(t.getStatus()) || "SELESAI".equals(t.getStatus()))
+                && t.getInvoice() != null;
+
+        RoundedButton btnInvoice = new RoundedButton(
+                approved ? "Cetak Invoice" : "Menunggu Admin",
+                approved ? Theme.ACCENT_LIME : Theme.BG_CARD_ALT,
+                Theme.ACCENT_LIME_HOVER,
+                approved ? Theme.DARK_PILL : Theme.TEXT_MUTED,
+                16);
+        btnInvoice.setEnabled(approved);
+        btnInvoice.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        btnInvoice.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnInvoice.addActionListener(e -> tampilkanModalInvoice(t.getInvoice()));
+
+        right.add(lblTotal);
+        right.add(Box.createVerticalStrut(8));
+        right.add(btnInvoice);
+
+        card.add(left, BorderLayout.CENTER);
+        card.add(right, BorderLayout.EAST);
+        return card;
+    }
+
+    private void tampilkanModalInvoice(Invoice invoice) {
+        if (invoice == null) return;
+        invoice.cetakInvoice();
+
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this),
+                "Invoice " + invoice.getIdInvoice(), JDialog.ModalityType.APPLICATION_MODAL);
+        dialog.setSize(560, 520);
+        dialog.setLocationRelativeTo(this);
+        dialog.getContentPane().setBackground(Theme.BG_ROOT);
+        dialog.setLayout(new BorderLayout(0, 12));
+
+        JTextArea area = new JTextArea(invoice.generateTeksInvoice());
+        area.setEditable(false);
+        area.setBackground(Theme.BG_CARD);
+        area.setForeground(Theme.TEXT_PRIMARY);
+        area.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        area.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setOpaque(false);
+        footer.setBorder(BorderFactory.createEmptyBorder(0, 16, 14, 16));
+
+        JLabel lblSaved = new JLabel("Tersimpan otomatis ke: data/invoices/" + invoice.getIdInvoice() + ".txt");
+        lblSaved.setFont(Theme.FONT_SMALL_BOLD);
+        lblSaved.setForeground(Theme.EMERALD);
+
+        RoundedButton btnClose = new RoundedButton(
+                "Tutup", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 14);
+        btnClose.setBorder(BorderFactory.createEmptyBorder(6, 18, 6, 18));
+        btnClose.addActionListener(e -> dialog.dispose());
+
+        footer.add(lblSaved, BorderLayout.WEST);
+        footer.add(btnClose, BorderLayout.EAST);
+
+        dialog.add(new JScrollPane(area), BorderLayout.CENTER);
+        dialog.add(footer, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+
+    private Color getStatusColor(String status) {
+        if ("DISEWA".equalsIgnoreCase(status)) return Theme.EMERALD;
+        if ("SELESAI".equalsIgnoreCase(status)) return new Color(37, 99, 235);
+        return Theme.AMBER_BADGE;
+    }
+}
