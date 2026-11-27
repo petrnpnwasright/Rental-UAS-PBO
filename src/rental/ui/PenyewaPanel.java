@@ -795,3 +795,83 @@ public class PenyewaPanel extends JPanel {
         right.add(recentCard, BorderLayout.SOUTH);
         return right;
     }
+
+    private void refreshCartPanel() {
+        if (cartItemsContainer == null) return;
+        cartItemsContainer.removeAll();
+        ArrayList<Barang> items = penyewa.getKeranjang().getBarang();
+        lblCartCount.setText(items.size() + " Item");
+
+        if (items.isEmpty()) {
+            JLabel empty = new JLabel("Keranjang kosong. Pilih barang di katalog.");
+            empty.setFont(Theme.FONT_SMALL);
+            empty.setForeground(Theme.TEXT_MUTED);
+            empty.setBorder(BorderFactory.createEmptyBorder(16, 4, 16, 4));
+            cartItemsContainer.add(empty);
+        } else {
+            for (Barang b : items) {
+                RoundedPanel row = new RoundedPanel(new BorderLayout(8, 0), 14, Theme.BG_CARD_ALT, null);
+                row.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+                row.setMaximumSize(new Dimension(320, 46));
+
+                JPanel info = new JPanel();
+                info.setOpaque(false);
+                info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
+                JLabel lName = new JLabel(b.getNama());
+                lName.setFont(Theme.FONT_SMALL_BOLD);
+                lName.setForeground(Theme.TEXT_PRIMARY);
+                JLabel lItemSub = new JLabel(Theme.formatRupiah(b.getTarifHarian()) + "/hari • " + b.getKategori());
+                lItemSub.setFont(new Font("SansSerif", Font.PLAIN, 10));
+                lItemSub.setForeground(Theme.TEXT_SECONDARY);
+                info.add(lName);
+                info.add(lItemSub);
+
+                RoundedButton btnDel = new RoundedButton(
+                        "x", Theme.CORAL_BG, Theme.CORAL_RED, Theme.CORAL_RED, 12);
+                btnDel.setFont(Theme.FONT_SMALL_BOLD);
+                btnDel.setPreferredSize(new Dimension(26, 26));
+                btnDel.addActionListener(e -> {
+                    penyewa.getKeranjang().hapusBarang(b.getId());
+                    refreshCartPanel();
+                });
+
+                row.add(info, BorderLayout.CENTER);
+                row.add(btnDel, BorderLayout.EAST);
+                cartItemsContainer.add(row);
+                cartItemsContainer.add(Box.createVerticalStrut(6));
+            }
+        }
+        updateEstimatedTotal();
+        cartItemsContainer.revalidate();
+        cartItemsContainer.repaint();
+    }
+
+    private void updateEstimatedTotal() {
+        if (spnLamaSewa == null || lblCartTotal == null) return;
+        int hari = (Integer) spnLamaSewa.getValue();
+        double est = penyewa.getKeranjang().hitungEstimasiTotal(hari);
+        lblCartTotal.setText(Theme.formatRupiah(est));
+    }
+
+    private void prosesCheckout() {
+        try {
+            int hari = (Integer) spnLamaSewa.getValue();
+            Pembayaran metode = (Pembayaran) cmbPembayaran.getSelectedItem();
+            String idTrx = dataStore.generateNextTransaksiId();
+
+            Transaksi trx = penyewa.buatTransaksi(idTrx, hari, metode);
+            dataStore.getDaftarTransaksi().add(trx);
+            dataStore.saveTransaksi();
+
+            refreshAll();
+            JOptionPane.showMessageDialog(this,
+                    "Transaksi " + trx.getId() + " berhasil dibuat!\n"
+                    + "Total Estimasi: " + Theme.formatRupiah(trx.hitungTotalSewa()) + "\n"
+                    + "Metode Pembayaran: " + metode.getNamaMetode() + "\n"
+                    + "Status: MENUNGGU KONFIRMASI ADMIN.",
+                    "Checkout Berhasil", JOptionPane.INFORMATION_MESSAGE);
+        } catch (InputTidakValidException | BarangTidakTersediaException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                    "Gagal Membuat Transaksi", JOptionPane.WARNING_MESSAGE);
+        }
+    }
