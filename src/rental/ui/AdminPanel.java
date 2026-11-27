@@ -757,3 +757,59 @@ public class AdminPanel extends JPanel {
         List<Transaksi> all = dataStore.getDaftarTransaksi();
         if (all.isEmpty()) {
             JLabel empty = new JLabel("Belum ada transaksi masuk.");
+            empty.setFont(Theme.FONT_SMALL);
+            empty.setForeground(Theme.TEXT_MUTED);
+            list.add(empty);
+        } else {
+            int start = Math.max(0, all.size() - 5);
+            for (int i = all.size() - 1; i >= start; i--) {
+                Transaksi t = all.get(i);
+                RoundedPanel row = new RoundedPanel(new BorderLayout(8, 0), 14, Theme.BG_CARD_ALT, null);
+                row.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+                row.setMaximumSize(new Dimension(320, 50));
+
+                JPanel left = new JPanel();
+                left.setOpaque(false);
+                left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+                JLabel lName = new JLabel(t.getId() + " • " + t.getPenyewa().getNamaLengkap());
+                lName.setFont(Theme.FONT_SMALL_BOLD);
+                lName.setForeground(Theme.TEXT_PRIMARY);
+                JLabel lItemSub = new JLabel(t.getStatus() + " (" + t.getLamaSewa() + " hari)");
+                lItemSub.setFont(new Font("SansSerif", Font.PLAIN, 10));
+                lItemSub.setForeground(Theme.TEXT_SECONDARY);
+                left.add(lName);
+                left.add(lItemSub);
+
+                double val = (t.getInvoice() != null) ? t.getInvoice().getTotal() : t.hitungTotalSewa();
+                JLabel lPrice = new JLabel(Theme.formatRupiah(val));
+                lPrice.setFont(Theme.FONT_SMALL_BOLD);
+                lPrice.setForeground(Theme.EMERALD);
+
+                row.add(left, BorderLayout.CENTER);
+                row.add(lPrice, BorderLayout.EAST);
+                list.add(row);
+                list.add(Box.createVerticalStrut(6));
+            }
+        }
+
+        feedCard.add(lblFeed, BorderLayout.NORTH);
+        feedCard.add(list, BorderLayout.CENTER);
+
+        right.add(topCard, BorderLayout.NORTH);
+        right.add(feedCard, BorderLayout.CENTER);
+        return right;
+    }
+
+    private JPanel wrapLabeledField(String label, Component field) {
+        JPanel p = new JPanel(new BorderLayout(0, 4));
+        p.setOpaque(false);
+        JLabel l = new JLabel(label);
+        l.setFont(Theme.FONT_SMALL_BOLD);
+        l.setForeground(Theme.TEXT_SECONDARY);
+        p.add(l, BorderLayout.NORTH);
+        p.add(field, BorderLayout.CENTER);
+        return p;
+    }
+
+    private JTable createStyledTable(DefaultTableModel model) {
+        JTable table = new JTable(model);
