@@ -695,3 +695,65 @@ public class AdminPanel extends JPanel {
 
         GradientCardPanel studioCard = new GradientCardPanel(
                 new BorderLayout(0, 10), 20,
+                Theme.GRADIENT_CARD_TOP, Theme.GRADIENT_CARD_BOT);
+        studioCard.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+
+        JLabel lblBadge = new JLabel("ADMIN ACCESS • ACTIVE");
+        lblBadge.setFont(Theme.FONT_SMALL_BOLD);
+        lblBadge.setForeground(Theme.ACCENT_LIME);
+
+        long menunggu = dataStore.getDaftarTransaksi().stream()
+                .filter(t -> "MENUNGGU_KONFIRMASI".equals(t.getStatus())).count();
+        long disewa = dataStore.getDaftarTransaksi().stream()
+                .filter(t -> "DISEWA".equals(t.getStatus())).count();
+
+        JPanel statsMid = new JPanel();
+        statsMid.setOpaque(false);
+        statsMid.setLayout(new BoxLayout(statsMid, BoxLayout.Y_AXIS));
+        JLabel lBig = new JLabel(menunggu + " Menunggu • " + disewa + " Aktif");
+        lBig.setFont(new Font("SansSerif", Font.BOLD, 17));
+        lBig.setForeground(Color.WHITE);
+        JLabel lSub = new JLabel("Denda Keterlambatan: Rp 50.000 / hari");
+        lSub.setFont(Theme.FONT_SMALL);
+        lSub.setForeground(new Color(195, 208, 198));
+        statsMid.add(lBig);
+        statsMid.add(Box.createVerticalStrut(4));
+        statsMid.add(lSub);
+
+        studioCard.add(lblBadge, BorderLayout.NORTH);
+        studioCard.add(statsMid, BorderLayout.SOUTH);
+
+        JPanel quickGrid = new JPanel(new GridLayout(1, 2, 10, 0));
+        quickGrid.setOpaque(false);
+        RoundedButton b1 = new RoundedButton(
+                "Persetujuan", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        b1.setPreferredSize(new Dimension(120, 36));
+        b1.addActionListener(e -> switchTab("TRANSAKSI"));
+
+        RoundedButton b2 = new RoundedButton(
+                "Pengembalian", Theme.BG_CARD, Theme.BG_CARD_ALT, Theme.TEXT_PRIMARY, 16);
+        b2.setBorderColor(Theme.BORDER_SUBTLE);
+        b2.setPreferredSize(new Dimension(120, 36));
+        b2.addActionListener(e -> switchTab("PENGEMBALIAN"));
+
+        quickGrid.add(b1);
+        quickGrid.add(b2);
+
+        topCard.add(lblTitle, BorderLayout.NORTH);
+        topCard.add(studioCard, BorderLayout.CENTER);
+        topCard.add(quickGrid, BorderLayout.SOUTH);
+
+        RoundedPanel feedCard = new RoundedPanel(new BorderLayout(0, 10), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        feedCard.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JLabel lblFeed = new JLabel("Aktivitas Transaksi Terbaru");
+        lblFeed.setFont(Theme.FONT_H2);
+        lblFeed.setForeground(Theme.TEXT_PRIMARY);
+
+        JPanel list = new JPanel();
+        list.setOpaque(false);
+        list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
+
+        List<Transaksi> all = dataStore.getDaftarTransaksi();
+        if (all.isEmpty()) {
+            JLabel empty = new JLabel("Belum ada transaksi masuk.");
