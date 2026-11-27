@@ -262,3 +262,64 @@ public class MainDashboardFrame extends JFrame {
 
         RoundedPanel profilePill = new RoundedPanel(new FlowLayout(FlowLayout.LEFT, 8, 3), 22,
                 Theme.BG_CARD, Theme.BORDER_SUBTLE);
+
+                        JPanel avatar = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Theme.EMERALD);
+                g2.fillOval(0, 0, 30, 30);
+                g2.setColor(Color.WHITE);
+                g2.setFont(new Font("SansSerif", Font.BOLD, 13));
+                String ini = akunAktif.getNamaLengkap().substring(0, 1).toUpperCase();
+                g2.drawString(ini, 10, 20);
+                g2.dispose();
+            }
+        };
+        avatar.setPreferredSize(new Dimension(30, 30));
+        avatar.setOpaque(false);
+
+        JPanel nameStack = new JPanel();
+        nameStack.setOpaque(false);
+        nameStack.setLayout(new BoxLayout(nameStack, BoxLayout.Y_AXIS));
+        JLabel lblName = new JLabel(akunAktif.getNamaLengkap());
+        lblName.setFont(Theme.FONT_SMALL_BOLD);
+        lblName.setForeground(Theme.TEXT_PRIMARY);
+        JLabel lblUser = new JLabel("@" + akunAktif.getUsername() + " • " + akunAktif.getRole());
+        lblUser.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        lblUser.setForeground(Theme.TEXT_SECONDARY);
+        nameStack.add(lblName);
+        nameStack.add(lblUser);
+
+        profilePill.add(avatar);
+        profilePill.add(nameStack);
+
+        rightGroup.add(lblHeaderStatus);
+        rightGroup.add(profilePill);
+
+        top.add(brandPanel, BorderLayout.WEST);
+        top.add(centerHolder, BorderLayout.CENTER);
+        top.add(rightGroup, BorderLayout.EAST);
+        return top;
+    }
+
+    private RoundedButton createTopPillButton(String text, boolean active, Runnable onClick) {
+        RoundedButton btn = new RoundedButton(
+                text,
+                Theme.BG_CARD,
+                Theme.BG_CARD_ALT,
+                active ? Theme.TEXT_PRIMARY : Theme.TEXT_SECONDARY,
+                16);
+        btn.setFont(active ? Theme.FONT_SMALL_BOLD : Theme.FONT_SMALL);
+        btn.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
+        btn.addActionListener(e -> onClick.run());
+        return btn;
+    }
+
+    private void updateHeaderBadge() {
+        int avail = dataStore.getDaftarBarang().getBarangTersedia().size();
+        int total = dataStore.getDaftarBarang().getBarang().size();
+        lblHeaderStatus.setText("  " + avail + "/" + total + " Unit Tersedia  ");
+    }
+}
