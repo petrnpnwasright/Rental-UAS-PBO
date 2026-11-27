@@ -919,3 +919,63 @@ public class PenyewaPanel extends JPanel {
         recentActivityList.revalidate();
         recentActivityList.repaint();
     }
+
+    private JPanel buildRiwayatView() {
+        JPanel wrapper = new JPanel(new BorderLayout(0, 14));
+        wrapper.setOpaque(false);
+
+        RoundedPanel header = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+        header.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
+
+        JPanel titleBox = new JPanel();
+        titleBox.setOpaque(false);
+        titleBox.setLayout(new BoxLayout(titleBox, BoxLayout.Y_AXIS));
+        JLabel lblTitle = new JLabel("Riwayat Penyewaan & Invoice Resmi");
+        lblTitle.setFont(Theme.FONT_H1);
+        lblTitle.setForeground(Theme.TEXT_PRIMARY);
+        JLabel lblSub = new JLabel("Setelah transaksi diterima Admin, Anda dapat melihat dan mencetak Invoice (.txt).");
+        lblSub.setFont(Theme.FONT_BODY);
+        lblSub.setForeground(Theme.TEXT_SECONDARY);
+        titleBox.add(lblTitle);
+        titleBox.add(Box.createVerticalStrut(4));
+        titleBox.add(lblSub);
+
+        RoundedButton btnBack = new RoundedButton(
+                "Kembali ke Katalog", Theme.ACCENT_LIME, Theme.ACCENT_LIME_HOVER, Theme.DARK_PILL, 16);
+        btnBack.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        btnBack.addActionListener(e -> switchTab("KATALOG"));
+
+        header.add(titleBox, BorderLayout.WEST);
+        header.add(btnBack, BorderLayout.EAST);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setOpaque(false);
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+
+        ArrayList<Transaksi> riwayat = penyewa.getRiwayat();
+        if (riwayat.isEmpty()) {
+            RoundedPanel emptyCard = new RoundedPanel(new BorderLayout(), 22, Theme.BG_CARD, Theme.BORDER_SUBTLE);
+            emptyCard.setBorder(BorderFactory.createEmptyBorder(40, 24, 40, 24));
+            JLabel lblEmpty = new JLabel("Belum ada riwayat penyewaan pada akun Anda.");
+            lblEmpty.setFont(Theme.FONT_H2);
+            lblEmpty.setForeground(Theme.TEXT_SECONDARY);
+            emptyCard.add(lblEmpty, BorderLayout.CENTER);
+            listPanel.add(emptyCard);
+        } else {
+            for (int i = riwayat.size() - 1; i >= 0; i--) {
+                Transaksi t = riwayat.get(i);
+                listPanel.add(buildTransaksiHistoryCard(t));
+                listPanel.add(Box.createVerticalStrut(12));
+            }
+        }
+
+        JScrollPane scroll = new JScrollPane(listPanel);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        wrapper.add(header, BorderLayout.NORTH);
+        wrapper.add(scroll, BorderLayout.CENTER);
+        return wrapper;
+    }
