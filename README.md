@@ -8,5 +8,8 @@ dibuat untuk UAS Pemrograman Berorientasi Objek.
 - Vani | 250810701100077
 - Virzi | 250810701100107
 
+## Cara Menjalankan program
+Jalankan menggunakan file **run.bat** jika anda menggunakan windows
+
 ## Status
 Selesai.
